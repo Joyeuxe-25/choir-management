@@ -7,7 +7,7 @@ export default function RecentMinutesPreview() {
   return (
     <SectionCard
       title="Recent Minutes"
-      actions={<Button variant="outline" size="sm">View all</Button>}
+      actions={<Button variant="outline">View all</Button>}
     >
       {recentMinutes.length === 0 ? (
         <p>No minutes yet.</p>
