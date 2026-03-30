@@ -1,0 +1,16 @@
+.row {
+  display: flex;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.label {
+  width: 120px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.value {
+  flex: 1;
+  color: var(--color-text);
+}

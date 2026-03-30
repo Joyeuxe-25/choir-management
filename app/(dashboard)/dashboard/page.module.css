@@ -1,0 +1,12 @@
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+  .twoColumns {
+    gap: var(--spacing-md);
+  }
+}

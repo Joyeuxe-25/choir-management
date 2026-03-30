@@ -1,0 +1,21 @@
+.voiceList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.voiceItem {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.voiceName {
+  font-weight: 500;
+}
+
+.voiceCount {
+  font-weight: 600;
+  color: var(--color-primary);
+}
