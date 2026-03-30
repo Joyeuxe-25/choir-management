@@ -1,12 +1,12 @@
 'use client';
 import { useRole } from '@/context/RoleContext';
 import PageHeader from '@/components/shared/PageHeader';
-import DashboardStats from '@/components/dashboard/DashboardStats';
-import QuickActions from '@/components/dashboard/QuickActions';g
-import VoiceSummary from '@/components/dashboard/VoiceSummary';
-import RecentMinutesPreview from '@/components/dashboard/RecentMinutesPreview';
-import RecentSongsPreview from '@/components/dashboard/RecentSongsPreview';
-import AttendanceOverview from '@/components/dashboard/AttendanceOverview';
+import DashboardStats from '@/components/Dashboard/DashboardStats';
+import QuickActions from '@/components/Dashboard/QuickActions';
+import VoiceSummary from '@/components/Dashboard/VoiceSummary';
+import RecentMinutesPreview from '@/components/Dashboard/RecentMinutesPreview';
+import RecentSongsPreview from '@/components/Dashboard/RecentSongsPreview';
+import AttendanceOverview from '@/components/Dashboard/AttendanceOverview';
 import SectionCard from '@/components/shared/SectionCard';
 import styles from './page.module.css';
 
