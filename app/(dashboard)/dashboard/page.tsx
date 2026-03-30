@@ -2,8 +2,7 @@
 import { useRole } from '@/context/RoleContext';
 import PageHeader from '@/components/shared/PageHeader';
 import DashboardStats from '@/components/dashboard/DashboardStats';
-import QuickActions from '@/components/dashboard/QuickActions';
-import RecentActivity from '@/components/dashboard/RecentActivity';
+import QuickActions from '@/components/dashboard/QuickActions';g
 import VoiceSummary from '@/components/dashboard/VoiceSummary';
 import RecentMinutesPreview from '@/components/dashboard/RecentMinutesPreview';
 import RecentSongsPreview from '@/components/dashboard/RecentSongsPreview';
