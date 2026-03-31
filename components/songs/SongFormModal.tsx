@@ -28,8 +28,11 @@ export default function SongFormModal({ isOpen, onClose, onSave, initialData }: 
 
   useEffect(() => {
     if (initialData) {
-      const { id, uploadDate, uploadedBy, ...rest } = initialData;
-      setFormData(rest);
+     const { id, uploadDate, uploadedBy, ...rest } = initialData;
+setFormData({
+  ...rest,
+  notes: rest.notes ?? '',
+});
     } else {
       setFormData(emptySong);
     }

@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './DataTable.module.css';
+import EmptyState from './EmptyState';
 
 export interface Column {
   key: string;

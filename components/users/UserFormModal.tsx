@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
 import Button from '@/components/shared/Button';
-import { User, UserRole, VoiceAssignment } from '@/types';
+import { User, UserRole, VoiceAssignment, UserStatus } from '@/types';
 import styles from './UserFormModal.module.css';
 
 interface UserFormModalProps {
@@ -13,17 +13,24 @@ interface UserFormModalProps {
   initialData?: User;
 }
 
-const emptyUser = {
+type UserFormData = {
+  name: string;
+  email: string;
+  role: UserRole;
+  voice: VoiceAssignment;
+  status: UserStatus;
+};
+
+const emptyUser: UserFormData = {
   name: '',
   email: '',
-  role: 'voiceLeader' as UserRole,
-  voice: null as VoiceAssignment,
-  status: 'active' as const,
+  role: 'voiceLeader',
+  voice: null,
+  status: 'active',
 };
 
 export default function UserFormModal({ isOpen, onClose, onSave, initialData }: UserFormModalProps) {
-  const [formData, setFormData] = useState(emptyUser);
-
+  const [formData, setFormData] = useState<UserFormData>(emptyUser);
   useEffect(() => {
     if (initialData) {
       const { id, createdAt, ...rest } = initialData;
