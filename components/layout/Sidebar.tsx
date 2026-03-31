@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useRole } from '@/context/RoleContext';
 import { getNavigationForRole } from '@/lib/navigation';
@@ -13,8 +14,14 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
   return (
     <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
       <div className={styles.logo}>
-        <span className={styles.logoIcon}>🎵</span>
-        <span className={styles.logoText}>Choir Manager</span>
+        <Image
+          src="/logo.jpeg"
+          alt="Chorale Angelus Dei"
+          width={36}
+          height={36}
+          className={styles.logoImage}
+        />
+        <span className={styles.logoText}>Chorale Angelus Dei</span>
       </div>
       <nav className={styles.nav}>
         {navItems.map((item) => (

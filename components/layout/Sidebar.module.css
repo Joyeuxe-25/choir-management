@@ -126,3 +126,8 @@
     transform: translateX(0);
   }
 }
+.logoImage {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
