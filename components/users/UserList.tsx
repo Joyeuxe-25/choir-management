@@ -2,12 +2,14 @@ import { User } from '@/types';
 import Badge from '@/components/shared/Badge';
 import Button from '@/components/shared/Button';
 import EmptyState from '@/components/shared/EmptyState';
+import { useRole } from '@/context/RoleContext';
 import styles from './UserList.module.css';
 
 interface UserListProps {
   users: User[];
   onEdit: (user: User) => void;
   onView: (user: User) => void;
+  onDelete: (user: User) => void;
 }
 
 const roleLabels = {
@@ -22,7 +24,9 @@ const roleVariant = {
   voiceLeader: 'success',
 } as const;
 
-export default function UserList({ users, onEdit, onView }: UserListProps) {
+export default function UserList({ users, onEdit, onView, onDelete }: UserListProps) {
+  const { role } = useRole();
+
   if (users.length === 0) {
     return <EmptyState title="No users found" description="Try adjusting filters or add a new user." />;
   }
@@ -61,6 +65,9 @@ export default function UserList({ users, onEdit, onView }: UserListProps) {
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(user)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(user)}>Edit</Button>
+                {role === 'admin' && (
+                  <Button variant="danger" onClick={() => onDelete(user)}>Delete</Button>
+                )}
               </td>
             </tr>
           ))}

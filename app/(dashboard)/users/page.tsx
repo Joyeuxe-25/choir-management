@@ -69,10 +69,8 @@ export default function UsersPage() {
 
   const handleSaveUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
     if (editingUser) {
-      // Edit existing
       setUsers(users.map(u => u.id === editingUser.id ? { ...editingUser, ...userData } : u));
     } else {
-      // Add new
       const newId = String(Math.max(...users.map(u => parseInt(u.id)), 0) + 1);
       const newUser: User = {
         id: newId,
@@ -82,6 +80,12 @@ export default function UsersPage() {
       setUsers([...users, newUser]);
     }
     setIsFormModalOpen(false);
+  };
+
+  const handleDeleteUser = (user: User) => {
+    if (confirm(`Delete user "${user.name}"?`)) {
+      setUsers(users.filter(u => u.id !== user.id));
+    }
   };
 
   return (
@@ -101,6 +105,7 @@ export default function UsersPage() {
         users={filteredUsers}
         onEdit={handleEditUser}
         onView={handleViewUser}
+        onDelete={handleDeleteUser}
       />
       <UserFormModal
         isOpen={isFormModalOpen}
