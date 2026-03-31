@@ -20,7 +20,6 @@ export default function MembersPage() {
   const [editingMember, setEditingMember] = useState<Member | undefined>(undefined);
   const [viewingMember, setViewingMember] = useState<Member | undefined>(undefined);
 
-  // Filter members
   const filteredMembers = useMemo(() => {
     return members.filter((member) => {
       const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -46,14 +45,18 @@ export default function MembersPage() {
 
   const handleSaveMember = (memberData: Omit<Member, 'id'>) => {
     if (editingMember) {
-      // Edit existing
       setMembers(members.map(m => m.id === editingMember.id ? { ...memberData, id: editingMember.id } : m));
     } else {
-      // Add new
       const newId = String(Math.max(...members.map(m => parseInt(m.id)), 0) + 1);
       setMembers([...members, { ...memberData, id: newId }]);
     }
     setIsFormModalOpen(false);
+  };
+
+  const handleDeleteMember = (member: Member) => {
+    if (confirm(`Delete ${member.name}?`)) {
+      setMembers(members.filter(m => m.id !== member.id));
+    }
   };
 
   const voiceOptions = [
@@ -99,6 +102,7 @@ export default function MembersPage() {
         members={filteredMembers}
         onEdit={handleEditMember}
         onView={handleViewMember}
+        onDelete={handleDeleteMember}
       />
       <MemberFormModal
         isOpen={isFormModalOpen}

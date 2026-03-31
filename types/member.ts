@@ -4,7 +4,7 @@ export interface Member {
   id: string;
   name: string;
   voice: VoiceType;
-  email: string;
+  email?: string;
   phone: string;
   joinDate: string;
   status: 'active' | 'inactive';

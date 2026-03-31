@@ -4,7 +4,6 @@ import PageHeader from '@/components/shared/PageHeader';
 import SearchBar from '@/components/shared/SearchBar';
 import FilterBar from '@/components/shared/FilterBar';
 import Select from '@/components/shared/Select';
-import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import SongList from '@/components/songs/SongList';
 import SongFormModal from '@/components/songs/SongFormModal';
@@ -82,21 +81,25 @@ export default function SongsPage() {
 
   const handleSaveSong = (songData: Omit<Song, 'id' | 'uploadDate' | 'uploadedBy'>) => {
     if (editingSong) {
-      // Edit existing
       setSongs(songs.map(s => s.id === editingSong.id ? { ...editingSong, ...songData } : s));
     } else {
-      // Add new
       const newId = String(Math.max(...songs.map(s => parseInt(s.id)), 0) + 1);
       const newSong: Song = {
         id: newId,
         ...songData,
         uploadDate: new Date().toISOString().split('T')[0],
-        uploadedBy: 'Current User', // dummy
+        uploadedBy: 'Current User',
         fileAttached: false,
       };
       setSongs([...songs, newSong]);
     }
     setIsFormModalOpen(false);
+  };
+
+  const handleDeleteSong = (song: Song) => {
+    if (confirm(`Delete "${song.title}"?`)) {
+      setSongs(songs.filter(s => s.id !== song.id));
+    }
   };
 
   return (
@@ -116,6 +119,7 @@ export default function SongsPage() {
         songs={filteredSongs}
         onEdit={handleEditSong}
         onView={handleViewSong}
+        onDelete={handleDeleteSong}
       />
       <SongFormModal
         isOpen={isFormModalOpen}

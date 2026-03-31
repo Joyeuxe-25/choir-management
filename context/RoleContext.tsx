@@ -2,18 +2,22 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type Role = 'admin' | 'secretary' | 'voiceLeader';
+type VoiceSection = 'Soprano' | 'Alto' | 'Tenor' | 'Bass' | null;
 
 interface RoleContextType {
   role: Role;
   setRole: (role: Role) => void;
+  voiceSection: VoiceSection;
+  setVoiceSection: (voice: VoiceSection) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 export const RoleProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<Role>('admin');
+  const [voiceSection, setVoiceSection] = useState<VoiceSection>(null);
   return (
-    <RoleContext.Provider value={{ role, setRole }}>
+    <RoleContext.Provider value={{ role, setRole, voiceSection, setVoiceSection }}>
       {children}
     </RoleContext.Provider>
   );

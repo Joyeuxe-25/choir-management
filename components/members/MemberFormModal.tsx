@@ -80,7 +80,7 @@ export default function MemberFormModal({ isOpen, onClose, onSave, initialData }
             <Input label="Full Name" name="name" value={formData.name} onChange={handleChange} required />
             <Select label="Gender" name="gender" options={genderOptions} value={formData.gender} onChange={handleChange} required />
             <Input label="Phone" name="phone" value={formData.phone} onChange={handleChange} required />
-            <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} required />
+            <Input label="Email (optional)" type="email" name="email" value={formData.email} onChange={handleChange} />
             <Select label="Voice" name="voice" options={voiceOptions} value={formData.voice} onChange={handleChange} required />
             <Input label="Join Date" type="date" name="joinDate" value={formData.joinDate} onChange={handleChange} required />
             <Select label="Status" name="status" options={statusOptions} value={formData.status} onChange={handleChange} required />
