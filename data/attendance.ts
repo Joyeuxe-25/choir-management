@@ -52,9 +52,9 @@ export const attendanceRecords: AttendanceRecord[] = [
     voice: 'Soprano',
     date: '2025-03-28',
     eventType: 'Rehearsal',
-    status: 'present',
+    status: 'late',
     markedBy: 'Admin',
-    note: '',
+    note: 'Arrived 15 min late',
   },
   {
     id: '6',

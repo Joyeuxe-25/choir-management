@@ -43,6 +43,7 @@ export default function AttendancePage() {
     { value: 'present', label: 'Present' },
     { value: 'absent', label: 'Absent' },
     { value: 'excused', label: 'Excused' },
+    { value: 'late', label: 'Late' },
   ];
 
   const filteredRecords = useMemo(() => {

@@ -17,10 +17,11 @@ const statusOptions = [
   { value: 'present', label: 'Present' },
   { value: 'absent', label: 'Absent' },
   { value: 'excused', label: 'Excused' },
+  { value: 'late', label: 'Late' },
 ];
 
 export default function EditAttendanceModal({ isOpen, onClose, onSave, initialData }: EditAttendanceModalProps) {
-  const [status, setStatus] = useState<'present' | 'absent' | 'excused'>('present');
+  const [status, setStatus] = useState<'present' | 'absent' | 'excused' | 'late'>('present');
   const [note, setNote] = useState('');
 
   useEffect(() => {

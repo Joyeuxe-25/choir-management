@@ -14,6 +14,7 @@ const statusVariant = {
   present: 'success',
   absent: 'danger',
   excused: 'warning',
+  late: 'info',
 } as const;
 
 export default function AttendanceList({ records, onEdit, onView }: AttendanceListProps) {

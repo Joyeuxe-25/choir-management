@@ -19,7 +19,7 @@ interface MemberAttendance {
   memberId: string;
   memberName: string;
   voice: string;
-  status: 'present' | 'absent' | 'excused';
+  status: 'present' | 'absent' | 'excused' | 'late';
   note: string;
 }
 
@@ -44,12 +44,11 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
     { value: 'present', label: 'Present' },
     { value: 'absent', label: 'Absent' },
     { value: 'excused', label: 'Excused' },
+    { value: 'late', label: 'Late' },
   ];
 
-  // Filter members based on selected voice
   const filteredMembers = members.filter(m => voiceFilter ? m.voice === voiceFilter : true);
 
-  // Initialize memberStatuses when voiceFilter changes or modal opens
   useEffect(() => {
     if (isOpen) {
       const initial = filteredMembers.map(m => ({
@@ -61,9 +60,9 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
       }));
       setMemberStatuses(initial);
     }
-  }, [isOpen, voiceFilter, filteredMembers]);
+  }, [isOpen, voiceFilter]);
 
-  const updateMemberStatus = (memberId: string, status: 'present' | 'absent' | 'excused') => {
+  const updateMemberStatus = (memberId: string, status: 'present' | 'absent' | 'excused' | 'late') => {
     setMemberStatuses(prev =>
       prev.map(m => m.memberId === memberId ? { ...m, status } : m)
     );
@@ -83,7 +82,7 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
       date,
       eventType,
       status: ms.status,
-      markedBy: 'Current User', // dummy
+      markedBy: 'Current User',
       note: ms.note || globalNote,
     }));
     onSave(records);

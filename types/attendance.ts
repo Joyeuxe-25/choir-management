@@ -5,7 +5,7 @@ export interface AttendanceRecord {
   voice: string;
   date: string;
   eventType: string;
-  status: 'present' | 'absent' | 'excused';
+  status: 'present' | 'absent' | 'excused' | 'late';
   markedBy: string;
   note?: string;
 }
