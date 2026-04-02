@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageHeader from '@/components/shared/PageHeader';
 import SearchBar from '@/components/shared/SearchBar';
 import FilterBar from '@/components/shared/FilterBar';
@@ -8,11 +8,13 @@ import Button from '@/components/shared/Button';
 import UserList from '@/components/users/UserList';
 import UserFormModal from '@/components/users/UserFormModal';
 import UserDetailModal from '@/components/users/UserDetailModal';
-import { users as initialUsers } from '@/data/users';
+import { usersApi } from '@/lib/api';
 import { User } from '@/types';
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -21,17 +23,48 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
   const [viewingUser, setViewingUser] = useState<User | undefined>(undefined);
 
+  // Load users from backend
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      const params: Record<string, string> = {};
+      if (roleFilter) params.role = roleFilter;
+      if (statusFilter) params.status = statusFilter;
+      if (voiceFilter) params.voice = voiceFilter;
+      if (searchQuery) params.search = searchQuery;
+      const res = await usersApi.getAll(params);
+      setUsers(res.data || []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load users');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, [roleFilter, statusFilter, voiceFilter]);
+
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery) return users;
+    return users.filter(user =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [users, searchQuery]);
+
   const roleOptions = [
     { value: '', label: 'All roles' },
-    { value: 'admin', label: 'Admin' },
-    { value: 'secretary', label: 'Secretary' },
-    { value: 'voiceLeader', label: 'Voice Leader' },
+    { value: 'Admin', label: 'Admin' },
+    { value: 'Secretary', label: 'Secretary' },
+    { value: 'VoiceLeader', label: 'Voice Leader' },
   ];
 
   const statusOptions = [
     { value: '', label: 'All statuses' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'Active', label: 'Active' },
+    { value: 'Inactive', label: 'Inactive' },
   ];
 
   const voiceOptions = [
@@ -41,17 +74,6 @@ export default function UsersPage() {
     { value: 'Tenor', label: 'Tenor' },
     { value: 'Bass', label: 'Bass' },
   ];
-
-  const filteredUsers = useMemo(() => {
-    return users.filter(user => {
-      const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            user.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesRole = roleFilter ? user.role === roleFilter : true;
-      const matchesStatus = statusFilter ? user.status === statusFilter : true;
-      const matchesVoice = voiceFilter ? user.voice === voiceFilter : true;
-      return matchesSearch && matchesRole && matchesStatus && matchesVoice;
-    });
-  }, [users, searchQuery, roleFilter, statusFilter, voiceFilter]);
 
   const handleAddUser = () => {
     setEditingUser(undefined);
@@ -67,24 +89,28 @@ export default function UsersPage() {
     setViewingUser(user);
   };
 
-  const handleSaveUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
-    if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...editingUser, ...userData } : u));
-    } else {
-      const newId = String(Math.max(...users.map(u => parseInt(u.id)), 0) + 1);
-      const newUser: User = {
-        id: newId,
-        ...userData,
-        createdAt: new Date().toISOString(),
-      };
-      setUsers([...users, newUser]);
+  const handleSaveUser = async (userData: any) => {
+    try {
+      if (editingUser) {
+        await usersApi.update(String(editingUser.id), userData);
+      } else {
+        await usersApi.create(userData);
+      }
+      setIsFormModalOpen(false);
+      loadUsers();
+    } catch (err: any) {
+      alert(err.message || 'Failed to save user');
     }
-    setIsFormModalOpen(false);
   };
 
-  const handleDeleteUser = (user: User) => {
+  const handleDeleteUser = async (user: User) => {
     if (confirm(`Delete user "${user.name}"?`)) {
-      setUsers(users.filter(u => u.id !== user.id));
+      try {
+        await usersApi.delete(String(user.id));
+        loadUsers();
+      } catch (err: any) {
+        alert(err.message || 'Failed to delete user');
+      }
     }
   };
 
@@ -101,12 +127,16 @@ export default function UsersPage() {
         <Select label="Status" options={statusOptions} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
         <Select label="Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
       </FilterBar>
-      <UserList
-        users={filteredUsers}
-        onEdit={handleEditUser}
-        onView={handleViewUser}
-        onDelete={handleDeleteUser}
-      />
+      {isLoading && <p style={{ padding: '1rem' }}>Loading users...</p>}
+      {error && <p style={{ padding: '1rem', color: 'red' }}>{error}</p>}
+      {!isLoading && !error && (
+        <UserList
+          users={filteredUsers}
+          onEdit={handleEditUser}
+          onView={handleViewUser}
+          onDelete={handleDeleteUser}
+        />
+      )}
       <UserFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}

@@ -3,38 +3,38 @@ import { useState, useEffect } from 'react';
 import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
 import Button from '@/components/shared/Button';
-import { User, UserRole, VoiceAssignment, UserStatus } from '@/types';
+import { User } from '@/types';
 import styles from './UserFormModal.module.css';
 
 interface UserFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (user: Omit<User, 'id' | 'createdAt'>) => void;
+  onSave: (user: any) => void;
   initialData?: User;
 }
 
-type UserFormData = {
-  name: string;
-  email: string;
-  role: UserRole;
-  voice: VoiceAssignment;
-  status: UserStatus;
-};
-
-const emptyUser: UserFormData = {
+const emptyUser = {
   name: '',
   email: '',
-  role: 'voiceLeader',
-  voice: null,
-  status: 'active',
+  password: '',
+  role: 'VoiceLeader',
+  voice: '',
+  status: 'Active',
 };
 
 export default function UserFormModal({ isOpen, onClose, onSave, initialData }: UserFormModalProps) {
-  const [formData, setFormData] = useState<UserFormData>(emptyUser);
+  const [formData, setFormData] = useState(emptyUser);
+
   useEffect(() => {
     if (initialData) {
-      const { id, createdAt, ...rest } = initialData;
-      setFormData(rest);
+      setFormData({
+        name: initialData.name,
+        email: initialData.email,
+        password: '',
+        role: initialData.role,
+        voice: initialData.voice || '',
+        status: initialData.status,
+      });
     } else {
       setFormData(emptyUser);
     }
@@ -47,21 +47,31 @@ export default function UserFormModal({ isOpen, onClose, onSave, initialData }: 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For voiceLeader, voice must be selected; for others, set null
-    const finalData = {
-      ...formData,
-      voice: formData.role === 'voiceLeader' ? formData.voice : null,
+    const payload: any = {
+      name: formData.name,
+      email: formData.email,
+      role: formData.role,
+      voice: formData.role === 'VoiceLeader' ? formData.voice : null,
+      status: formData.status,
     };
-    onSave(finalData);
-    onClose();
+    // Only include password if provided
+    if (formData.password) {
+      payload.password = formData.password;
+    }
+    // Password required for new users
+    if (!initialData && !formData.password) {
+      alert('Password is required for new users');
+      return;
+    }
+    onSave(payload);
   };
 
   if (!isOpen) return null;
 
   const roleOptions = [
-    { value: 'admin', label: 'Admin' },
-    { value: 'secretary', label: 'Secretary' },
-    { value: 'voiceLeader', label: 'Voice Leader' },
+    { value: 'Admin', label: 'Admin' },
+    { value: 'Secretary', label: 'Secretary' },
+    { value: 'VoiceLeader', label: 'Voice Leader' },
   ];
 
   const voiceOptions = [
@@ -73,11 +83,11 @@ export default function UserFormModal({ isOpen, onClose, onSave, initialData }: 
   ];
 
   const statusOptions = [
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'Active', label: 'Active' },
+    { value: 'Inactive', label: 'Inactive' },
   ];
 
-  const showVoiceField = formData.role === 'voiceLeader';
+  const showVoiceField = formData.role === 'VoiceLeader';
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -92,16 +102,22 @@ export default function UserFormModal({ isOpen, onClose, onSave, initialData }: 
             <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} required />
             <Select label="Role" name="role" options={roleOptions} value={formData.role} onChange={handleChange} required />
             {showVoiceField && (
-              <Select label="Assigned Voice" name="voice" options={voiceOptions} value={formData.voice || ''} onChange={handleChange} required />
+              <Select label="Assigned Voice" name="voice" options={voiceOptions} value={formData.voice} onChange={handleChange} required />
             )}
             <Select label="Status" name="status" options={statusOptions} value={formData.status} onChange={handleChange} required />
           </div>
           <div className={styles.passwordSection}>
             <div className={styles.twoColumns}>
-              <Input label="Password (placeholder)" type="password" placeholder="••••••••" disabled />
-              <Input label="Confirm Password (placeholder)" type="password" placeholder="••••••••" disabled />
+              <Input
+                label={initialData ? 'New Password (leave blank to keep)' : 'Password'}
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                required={!initialData}
+              />
             </div>
-            <p className={styles.note}>Password management will be added later.</p>
           </div>
           <div className={styles.actions}>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
