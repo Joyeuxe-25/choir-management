@@ -17,7 +17,7 @@ const emptyUser = {
   name: '',
   email: '',
   password: '',
-  role: 'VoiceLeader',
+  role: 'Voice Leader',
   voice: '',
   status: 'Active',
 };
@@ -47,21 +47,19 @@ export default function UserFormModal({ isOpen, onClose, onSave, initialData }: 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!initialData && !formData.password) {
+      alert('Password is required for new users');
+      return;
+    }
     const payload: any = {
       name: formData.name,
       email: formData.email,
       role: formData.role,
-      voice: formData.role === 'VoiceLeader' ? formData.voice : null,
+      voice: formData.role === 'Voice Leader' ? formData.voice || null : null,
       status: formData.status,
     };
-    // Only include password if provided
     if (formData.password) {
       payload.password = formData.password;
-    }
-    // Password required for new users
-    if (!initialData && !formData.password) {
-      alert('Password is required for new users');
-      return;
     }
     onSave(payload);
   };
@@ -71,7 +69,7 @@ export default function UserFormModal({ isOpen, onClose, onSave, initialData }: 
   const roleOptions = [
     { value: 'Admin', label: 'Admin' },
     { value: 'Secretary', label: 'Secretary' },
-    { value: 'VoiceLeader', label: 'Voice Leader' },
+    { value: 'Voice Leader', label: 'Voice Leader' },
   ];
 
   const voiceOptions = [
@@ -87,7 +85,7 @@ export default function UserFormModal({ isOpen, onClose, onSave, initialData }: 
     { value: 'Inactive', label: 'Inactive' },
   ];
 
-  const showVoiceField = formData.role === 'VoiceLeader';
+  const showVoiceField = formData.role === 'Voice Leader';
 
   return (
     <div className={styles.overlay} onClick={onClose}>

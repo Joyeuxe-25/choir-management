@@ -1,5 +1,5 @@
-export type UserRole = 'admin' | 'secretary' | 'voiceLeader';
-export type UserStatus = 'active' | 'inactive';
+export type UserRole = 'Admin' | 'Secretary' | 'Voice Leader';
+export type UserStatus = 'Active' | 'Inactive';
 export type VoiceAssignment = 'Soprano' | 'Alto' | 'Tenor' | 'Bass' | null;
 
 export interface User {
@@ -9,5 +9,5 @@ export interface User {
   role: UserRole;
   voice: VoiceAssignment;
   status: UserStatus;
-  createdAt: string;
+  created_at: string;
 }

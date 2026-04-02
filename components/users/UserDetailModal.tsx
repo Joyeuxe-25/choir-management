@@ -10,23 +10,20 @@ interface UserDetailModalProps {
   user?: User;
 }
 
-const roleLabels = {
-  admin: 'Admin',
-  secretary: 'Secretary',
-  voiceLeader: 'Voice Leader',
-};
-
 const roleVariant = {
-  admin: 'danger',
-  secretary: 'info',
-  voiceLeader: 'success',
+  'Admin': 'danger',
+  'Secretary': 'info',
+  'Voice Leader': 'success',
 } as const;
 
 export default function UserDetailModal({ isOpen, onClose, user }: UserDetailModalProps) {
   if (!isOpen || !user) return null;
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString();
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleString();
   };
 
   return (
@@ -39,10 +36,10 @@ export default function UserDetailModal({ isOpen, onClose, user }: UserDetailMod
         <div className={styles.content}>
           <InfoRow label="Full Name" value={user.name} />
           <InfoRow label="Email" value={user.email} />
-          <InfoRow label="Role" value={<Badge variant={roleVariant[user.role]}>{roleLabels[user.role]}</Badge>} />
+          <InfoRow label="Role" value={<Badge variant={roleVariant[user.role] ?? 'default'}>{user.role}</Badge>} />
           <InfoRow label="Assigned Voice" value={user.voice || 'Not applicable'} />
-          <InfoRow label="Status" value={<Badge variant={user.status === 'active' ? 'success' : 'danger'}>{user.status}</Badge>} />
-          <InfoRow label="Created" value={formatDate(user.createdAt)} />
+          <InfoRow label="Status" value={<Badge variant={user.status === 'Active' ? 'success' : 'danger'}>{user.status}</Badge>} />
+          <InfoRow label="Created" value={formatDate(user.created_at)} />
         </div>
         <div className={styles.footer}>
           <Button variant="outline" onClick={onClose}>Close</Button>

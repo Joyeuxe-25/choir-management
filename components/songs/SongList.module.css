@@ -19,7 +19,7 @@
 }
 
 .table th {
-  background-color: #f9fafb;
+  background-color: var(--color-primary-light);
   font-weight: 600;
 }
 

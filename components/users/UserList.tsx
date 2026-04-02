@@ -12,16 +12,10 @@ interface UserListProps {
   onDelete: (user: User) => void;
 }
 
-const roleLabels = {
-  admin: 'Admin',
-  secretary: 'Secretary',
-  voiceLeader: 'Voice Leader',
-};
-
 const roleVariant = {
-  admin: 'danger',
-  secretary: 'info',
-  voiceLeader: 'success',
+  'Admin': 'danger',
+  'Secretary': 'info',
+  'Voice Leader': 'success',
 } as const;
 
 export default function UserList({ users, onEdit, onView, onDelete }: UserListProps) {
@@ -32,7 +26,10 @@ export default function UserList({ users, onEdit, onView, onDelete }: UserListPr
   }
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString();
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString();
   };
 
   return (
@@ -54,14 +51,18 @@ export default function UserList({ users, onEdit, onView, onDelete }: UserListPr
             <tr key={user.id}>
               <td>{user.name}</td>
               <td>{user.email}</td>
-              <td><Badge variant={roleVariant[user.role]}>{roleLabels[user.role]}</Badge></td>
+              <td>
+                <Badge variant={roleVariant[user.role] ?? 'default'}>
+                  {user.role}
+                </Badge>
+              </td>
               <td>{user.voice || '—'}</td>
               <td>
-                <Badge variant={user.status === 'active' ? 'success' : 'danger'}>
+                <Badge variant={user.status === 'Active' ? 'success' : 'danger'}>
                   {user.status}
                 </Badge>
               </td>
-              <td>{formatDate(user.createdAt)}</td>
+              <td>{formatDate(user.created_at)}</td>
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(user)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(user)}>Edit</Button>
