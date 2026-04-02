@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // On mount, check if token exists and fetch user
   useEffect(() => {
     const token = getToken();
     if (token) {
@@ -49,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     authApi.logout();
     setUser(null);
-    router.push('/auth/login');
+    router.push('/login');
   };
 
   return (
