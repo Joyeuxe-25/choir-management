@@ -1,6 +1,6 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import { useRole } from '@/context/RoleContext';
+import { useAuth } from '@/context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import styles from './Header.module.css';
 
@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname();
-  const { role } = useRole();
+  const { user, logout } = useAuth();
   const pageTitle = pathname.split('/').pop() || 'Dashboard';
   const title = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
 
@@ -27,8 +27,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <ThemeToggle />
         <div className={styles.user}>
           <span className={styles.avatar}>👤</span>
-          <span className={styles.name}>John Doe</span>
+          <span className={styles.name}>{user?.name || 'User'}</span>
         </div>
+        <button className={styles.logoutBtn} onClick={logout}>Logout</button>
       </div>
     </header>
   );

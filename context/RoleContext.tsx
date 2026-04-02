@@ -1,5 +1,6 @@
 'use client';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 
 type Role = 'admin' | 'secretary' | 'voiceLeader';
 type VoiceSection = 'Soprano' | 'Alto' | 'Tenor' | 'Bass' | null;
@@ -13,9 +14,25 @@ interface RoleContextType {
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
+const mapRole = (backendRole: string): Role => {
+  if (backendRole === 'Admin') return 'admin';
+  if (backendRole === 'Secretary') return 'secretary';
+  if (backendRole === 'VoiceLeader') return 'voiceLeader';
+  return 'admin';
+};
+
 export const RoleProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
   const [role, setRole] = useState<Role>('admin');
   const [voiceSection, setVoiceSection] = useState<VoiceSection>(null);
+
+  useEffect(() => {
+    if (user) {
+      setRole(mapRole(user.role));
+      setVoiceSection((user.voice as VoiceSection) || null);
+    }
+  }, [user]);
+
   return (
     <RoleContext.Provider value={{ role, setRole, voiceSection, setVoiceSection }}>
       {children}
