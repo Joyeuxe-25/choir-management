@@ -3,12 +3,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useRole } from '@/context/RoleContext';
+import { useAuth } from '@/context/AuthContext';
 import { getNavigationForRole } from '@/lib/navigation';
 import styles from './Sidebar.module.css';
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const { role } = useRole();
+  const { user, logout } = useAuth();
   const navItems = getNavigationForRole(role);
 
   return (
@@ -39,9 +41,9 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
       <div className={styles.footer}>
         <div className={styles.userInfo}>
           <span className={styles.userAvatar}>👤</span>
-          <span className={styles.userName}>John Doe</span>
+          <span className={styles.userName}>{user?.name || 'User'}</span>
         </div>
-        <button className={styles.logoutButton}>Logout</button>
+        <button className={styles.logoutButton} onClick={logout}>Logout</button>
       </div>
     </aside>
   );
