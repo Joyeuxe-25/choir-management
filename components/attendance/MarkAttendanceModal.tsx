@@ -4,6 +4,7 @@ import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
 import Button from '@/components/shared/Button';
 import { membersApi } from '@/lib/api';
+import { useRole } from '@/context/RoleContext';
 import { eventTypes } from '@/data/eventTypes';
 import styles from './MarkAttendanceModal.module.css';
 
@@ -21,6 +22,7 @@ interface MemberAttendance {
 }
 
 export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAttendanceModalProps) {
+  const { role, voiceSection } = useRole();
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [eventType, setEventType] = useState(eventTypes[0]);
   const [voiceFilter, setVoiceFilter] = useState('');
@@ -52,7 +54,12 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
     try {
       setIsLoadingMembers(true);
       const params: Record<string, string> = { status: 'Active' };
-      if (voiceFilter) params.voice = voiceFilter;
+      // Voice leaders only load their section
+      if (role === 'voiceLeader' && voiceSection) {
+        params.voice = voiceSection;
+      } else if (voiceFilter) {
+        params.voice = voiceFilter;
+      }
       const res = await membersApi.getAll(params);
       const initial = (res.data || []).map((m: any) => ({
         member_id: String(m.id),
@@ -97,11 +104,23 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
           <div className={styles.twoColumns}>
             <Input label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             <Select label="Event Type" options={eventOptions} value={eventType} onChange={(e) => setEventType(e.target.value)} required />
-            <Select label="Filter by Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
+            {role !== 'voiceLeader' && (
+              <Select label="Filter by Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
+            )}
           </div>
           <div className={styles.membersSection}>
-            <h3>Members</h3>
+            <h3>
+              Members
+              {role === 'voiceLeader' && voiceSection && (
+                <span style={{ fontWeight: 400, fontSize: '0.875rem', marginLeft: '0.5rem', color: 'var(--color-text-secondary)' }}>
+                  ({voiceSection})
+                </span>
+              )}
+            </h3>
             {isLoadingMembers && <p>Loading members...</p>}
+            {!isLoadingMembers && memberStatuses.length === 0 && (
+              <p>No members found.</p>
+            )}
             {!isLoadingMembers && memberStatuses.map(member => (
               <div key={member.member_id} className={styles.memberRow}>
                 <div className={styles.memberInfo}>

@@ -3,70 +3,32 @@
   background-color: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  -webkit-overflow-scrolling: touch;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
-  min-width: 600px;
+  min-width: 700px;
 }
 
 .table th,
 .table td {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md);
   text-align: left;
   border-bottom: 1px solid var(--color-border);
-  color: var(--color-text);
 }
 
 .table th {
-  background-color: var(--color-primary-light);
+  background-color: #f9fafb;
   font-weight: 600;
-  color: var(--color-text);
   white-space: nowrap;
-}
-
-.table td {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 200px;
 }
 
 .actions {
   display: flex;
   gap: var(--spacing-xs);
-  flex-wrap: wrap;
-}
-
-.hideSmall {
-  display: table-cell;
-}
-
-.hideMedium {
-  display: table-cell;
-}
-
-@media (max-width: 640px) {
-  .hideSmall {
-    display: none;
-  }
-
-  .table th,
-  .table td {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.75rem;
-  }
-
-  .actions {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 900px) {
-  .hideMedium {
-    display: none;
-  }
+  flex-wrap: nowrap;
+  min-width: 180px;
+  white-space: nowrap;
 }

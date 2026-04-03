@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
 import Button from '@/components/shared/Button';
+import { useRole } from '@/context/RoleContext';
 import { Member } from '@/types';
 import styles from './MemberFormModal.module.css';
 
@@ -15,13 +16,14 @@ interface MemberFormModalProps {
 
 const emptyMember = {
   name: '',
-  voice: 'Soprano',
+  voice: '',
   phone: '',
   join_date: new Date().toISOString().split('T')[0],
   status: 'Active',
 };
 
 export default function MemberFormModal({ isOpen, onClose, onSave, initialData }: MemberFormModalProps) {
+  const { role, voiceSection } = useRole();
   const [formData, setFormData] = useState(emptyMember);
 
   useEffect(() => {
@@ -29,14 +31,18 @@ export default function MemberFormModal({ isOpen, onClose, onSave, initialData }
       setFormData({
         name: initialData.name,
         voice: initialData.voice,
-        phone: initialData.phone,
+        phone: initialData.phone || '',
         join_date: initialData.join_date,
         status: initialData.status,
       });
     } else {
-      setFormData(emptyMember);
+      setFormData({
+        ...emptyMember,
+        // Pre-fill voice for voice leaders
+        voice: role === 'voiceLeader' && voiceSection ? voiceSection : '',
+      });
     }
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen, role, voiceSection]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -49,12 +55,18 @@ export default function MemberFormModal({ isOpen, onClose, onSave, initialData }
 
   if (!isOpen) return null;
 
-  const voiceOptions = [
+  // Voice leaders only see their own section
+  const allVoiceOptions = [
+    { value: '', label: 'Select voice' },
     { value: 'Soprano', label: 'Soprano' },
     { value: 'Alto', label: 'Alto' },
     { value: 'Tenor', label: 'Tenor' },
     { value: 'Bass', label: 'Bass' },
   ];
+
+  const voiceOptions = role === 'voiceLeader' && voiceSection
+    ? [{ value: voiceSection, label: voiceSection }]
+    : allVoiceOptions;
 
   const statusOptions = [
     { value: 'Active', label: 'Active' },
@@ -71,8 +83,15 @@ export default function MemberFormModal({ isOpen, onClose, onSave, initialData }
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.twoColumns}>
             <Input label="Full Name" name="name" value={formData.name} onChange={handleChange} required />
-            <Input label="Phone" name="phone" value={formData.phone} onChange={handleChange} required />
-            <Select label="Voice" name="voice" options={voiceOptions} value={formData.voice} onChange={handleChange} required />
+            <Select
+              label="Voice"
+              name="voice"
+              options={voiceOptions}
+              value={formData.voice}
+              onChange={handleChange}
+              required
+            />
+            <Input label="Phone" name="phone" value={formData.phone} onChange={handleChange} />
             <Input label="Join Date" type="date" name="join_date" value={formData.join_date} onChange={handleChange} required />
             <Select label="Status" name="status" options={statusOptions} value={formData.status} onChange={handleChange} required />
           </div>

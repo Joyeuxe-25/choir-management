@@ -10,7 +10,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
-  min-width: 600px;
+  min-width: 800px;
 }
 
 .table th,
@@ -32,41 +32,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
 }
 
 .actions {
   display: flex;
   gap: var(--spacing-xs);
-  flex-wrap: wrap;
-}
-
-.hideSmall {
-  display: table-cell;
-}
-
-.hideMedium {
-  display: table-cell;
-}
-
-@media (max-width: 640px) {
-  .hideSmall {
-    display: none;
-  }
-
-  .table th,
-  .table td {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.75rem;
-  }
-
-  .actions {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 900px) {
-  .hideMedium {
-    display: none;
-  }
+  flex-wrap: nowrap;
+  min-width: 180px;
+  white-space: nowrap;
 }
