@@ -23,3 +23,14 @@
 .summary {
   font-size: 0.875rem;
 }
+
+.state {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  padding: var(--spacing-sm) 0;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}

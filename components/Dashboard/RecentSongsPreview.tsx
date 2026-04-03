@@ -1,6 +1,8 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import SectionCard from '@/components/shared/SectionCard';
 import Button from '@/components/shared/Button';
-import { recentSongs } from '@/data/dashboard';
+import { useDashboard } from '@/hooks/useDashboard';
 import styles from './RecentSongsPreview.module.css';
 
 interface RecentSongsPreviewProps {
@@ -8,24 +10,32 @@ interface RecentSongsPreviewProps {
 }
 
 export default function RecentSongsPreview({ limit = 3 }: RecentSongsPreviewProps) {
-  const songsToShow = recentSongs.slice(0, limit);
+  const { data, loading, error } = useDashboard();
+  const router = useRouter();
+
+  const songs = (data?.recent_songs ?? []).slice(0, limit);
 
   return (
     <SectionCard
       title="Recent Songs"
-      actions={<Button variant="outline">View all</Button>}
+      actions={
+        <Button variant="outline" onClick={() => router.push('/songs')}>
+          View all
+        </Button>
+      }
     >
-      {songsToShow.length === 0 ? (
-        <p>No songs added yet.</p>
-      ) : (
+      {loading && <p className={styles.state}>Loading...</p>}
+      {error && <p className={styles.state}>Could not load songs.</p>}
+      {!loading && !error && songs.length === 0 && (
+        <p className={styles.state}>No songs added yet.</p>
+      )}
+      {!loading && !error && songs.length > 0 && (
         <div className={styles.list}>
-          {songsToShow.map((song) => (
+          {songs.map(song => (
             <div key={song.id} className={styles.item}>
-              <div>
-                <div className={styles.title}>{song.title}</div>
-                <div className={styles.composer}>{song.composer}</div>
-                <div className={styles.date}>Added: {song.addedDate}</div>
-              </div>
+              <div className={styles.title}>{song.title}</div>
+              <div className={styles.meta}>{song.category} · {song.language}</div>
+              <div className={styles.date}>Added: {song.upload_date}</div>
             </div>
           ))}
         </div>

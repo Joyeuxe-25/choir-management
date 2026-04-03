@@ -24,3 +24,14 @@
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }
+
+.state {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  padding: var(--spacing-sm) 0;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
