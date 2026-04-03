@@ -24,17 +24,17 @@ export default function EditAttendanceModal({ isOpen, onClose, onSave, initialDa
 
   useEffect(() => {
     if (initialData) {
-      // normalize in case old records have lowercase
       const normalized = initialData.status.charAt(0).toUpperCase() + initialData.status.slice(1).toLowerCase();
       setStatus(normalized as any);
     }
   }, [initialData, isOpen]);
 
   const handleSubmit = () => {
-  if (!initialData) return;
-  onSave({ ...initialData, status: status.toLowerCase() as any });
-  onClose();
-};
+    if (!initialData) return;
+    // Pass status as-is (capitalized) — page handler will capitalize before sending to API
+    onSave({ ...initialData, status: status as any });
+    onClose();
+  };
 
   if (!isOpen || !initialData) return null;
 

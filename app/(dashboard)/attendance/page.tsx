@@ -46,9 +46,7 @@ export default function AttendancePage() {
     }
   };
 
-  useEffect(() => {
-    loadRecords();
-  }, [voiceFilter, eventFilter, statusFilter, dateFilter]);
+  useEffect(() => { loadRecords(); }, [voiceFilter, eventFilter, statusFilter, dateFilter]);
 
   const filteredRecords = useMemo(() => {
     if (!searchQuery) return records;
@@ -72,16 +70,22 @@ export default function AttendancePage() {
 
   const statusOptions = [
     { value: '', label: 'All statuses' },
-    { value: 'present', label: 'Present' },
-    { value: 'absent', label: 'Absent' },
-    { value: 'excused', label: 'Excused' },
-    { value: 'late', label: 'Late' },
+    { value: 'Present', label: 'Present' },
+    { value: 'Absent', label: 'Absent' },
+    { value: 'Excused', label: 'Excused' },
+    { value: 'Late', label: 'Late' },
   ];
+
+  const capitalize = (s: string) =>
+    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
   const handleMarkAttendance = async (newRecords: any[]) => {
     try {
       for (const record of newRecords) {
-        await attendanceApi.create(record);
+        await attendanceApi.create({
+          ...record,
+          status: capitalize(record.status),
+        });
       }
       setIsMarkModalOpen(false);
       loadRecords();
@@ -93,7 +97,7 @@ export default function AttendancePage() {
   const handleEditRecord = async (updatedRecord: AttendanceRecord) => {
     try {
       await attendanceApi.update(String(updatedRecord.id), {
-        status: updatedRecord.status,
+        status: capitalize(updatedRecord.status),
       });
       setEditingRecord(undefined);
       loadRecords();
@@ -102,8 +106,14 @@ export default function AttendancePage() {
     }
   };
 
-  const handleViewRecord = (record: AttendanceRecord) => {
-    setViewingRecord(record);
+  const handleDeleteRecord = async (record: AttendanceRecord) => {
+    if (!confirm(`Delete attendance record for "${record.member_name}" on ${record.date}?`)) return;
+    try {
+      await attendanceApi.delete(String(record.id));
+      loadRecords();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete attendance record');
+    }
   };
 
   return (
@@ -126,7 +136,8 @@ export default function AttendancePage() {
         <AttendanceList
           records={filteredRecords}
           onEdit={setEditingRecord}
-          onView={handleViewRecord}
+          onView={(record) => setViewingRecord(record)}
+          onDelete={handleDeleteRecord}
         />
       )}
       <MarkAttendanceModal

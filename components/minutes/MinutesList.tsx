@@ -8,9 +8,10 @@ interface MinutesListProps {
   minutes: Minute[];
   onEdit: (minute: Minute) => void;
   onView: (minute: Minute) => void;
+  onDelete: (minute: Minute) => void;
 }
 
-export default function MinutesList({ minutes, onEdit, onView }: MinutesListProps) {
+export default function MinutesList({ minutes, onEdit, onView, onDelete }: MinutesListProps) {
   if (minutes.length === 0) {
     return <EmptyState title="No minutes found" description="Try adjusting filters or add new minutes." />;
   }
@@ -43,15 +44,15 @@ export default function MinutesList({ minutes, onEdit, onView }: MinutesListProp
               <td>{minute.recorded_by_name || '—'}</td>
               <td>{formatDate(minute.updated_at)}</td>
               <td>
-                {minute.attachment_present ? (
-                  <Badge variant="success">📎 Attached</Badge>
-                ) : (
-                  <Badge variant="default">No attachment</Badge>
-                )}
+                {minute.attachment_present
+                  ? <Badge variant="success">📎 Attached</Badge>
+                  : <Badge variant="default">No attachment</Badge>
+                }
               </td>
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(minute)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(minute)}>Edit</Button>
+                <Button variant="danger" onClick={() => onDelete(minute)}>Del</Button>
               </td>
             </tr>
           ))}

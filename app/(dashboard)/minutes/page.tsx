@@ -62,9 +62,7 @@ export default function MinutesPage() {
     try {
       setIsSaving(true);
       const { file, ...rest } = minuteData;
-
       let payload: any = { ...rest };
-
       if (file instanceof File) {
         if (file.size > 800 * 1024) {
           alert('File is too large. Please use a file under 800KB.');
@@ -77,7 +75,6 @@ export default function MinutesPage() {
         payload.attachment_size = file.size;
         payload.attachment_uploaded_at = new Date().toISOString().split('T')[0];
       }
-
       if (editingMinute) {
         await minutesApi.update(String(editingMinute.id), payload);
       } else {
@@ -89,6 +86,16 @@ export default function MinutesPage() {
       alert(err.message || 'Failed to save minutes');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteMinute = async (minute: Minute) => {
+    if (!confirm(`Delete "${minute.title}"?`)) return;
+    try {
+      await minutesApi.delete(String(minute.id));
+      loadMinutes();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete minutes');
     }
   };
 
@@ -110,6 +117,7 @@ export default function MinutesPage() {
           minutes={filteredMinutes}
           onEdit={handleEditMinute}
           onView={handleViewMinute}
+          onDelete={handleDeleteMinute}
         />
       )}
       <MinuteFormModal

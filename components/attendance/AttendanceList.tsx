@@ -8,16 +8,21 @@ interface AttendanceListProps {
   records: AttendanceRecord[];
   onEdit: (record: AttendanceRecord) => void;
   onView: (record: AttendanceRecord) => void;
+  onDelete: (record: AttendanceRecord) => void;
 }
 
-const statusVariant = {
+const statusVariant: Record<string, 'success' | 'danger' | 'warning' | 'info'> = {
   present: 'success',
   absent: 'danger',
   excused: 'warning',
   late: 'info',
-} as const;
+  Present: 'success',
+  Absent: 'danger',
+  Excused: 'warning',
+  Late: 'info',
+};
 
-export default function AttendanceList({ records, onEdit, onView }: AttendanceListProps) {
+export default function AttendanceList({ records, onEdit, onView, onDelete }: AttendanceListProps) {
   if (records.length === 0) {
     return <EmptyState title="No attendance records found" description="Try adjusting filters or mark new attendance." />;
   }
@@ -43,11 +48,16 @@ export default function AttendanceList({ records, onEdit, onView }: AttendanceLi
               <td>{record.member_voice}</td>
               <td>{record.date}</td>
               <td>{record.event_type}</td>
-              <td><Badge variant={statusVariant[record.status]}>{record.status}</Badge></td>
+              <td>
+                <Badge variant={statusVariant[record.status] ?? 'info'}>
+                  {record.status}
+                </Badge>
+              </td>
               <td>{record.marked_by_name || '—'}</td>
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(record)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(record)}>Edit</Button>
+                <Button variant="danger" onClick={() => onDelete(record)}>Del</Button>
               </td>
             </tr>
           ))}
