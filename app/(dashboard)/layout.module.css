@@ -9,12 +9,14 @@
   flex-direction: column;
   min-width: 0;
   overflow-x: hidden;
+  min-height: 100vh; /* add this */
 }
 
 .content {
   padding: var(--spacing-lg);
   background-color: var(--color-bg);
   flex: 1;
+  overflow-y: auto; /* add this */
 }
 
 .overlay {

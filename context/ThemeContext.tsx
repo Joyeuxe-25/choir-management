@@ -15,7 +15,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const saved = localStorage.getItem('theme') as Theme | null;
-    const preferred = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const preferred = saved || 'light'; // always default to light
     setTheme(preferred);
     document.documentElement.setAttribute('data-theme', preferred);
   }, []);

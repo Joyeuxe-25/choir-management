@@ -67,7 +67,7 @@ export default function UserList({ users, onEdit, onView, onDelete }: UserListPr
                 <Button variant="outline" onClick={() => onView(user)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(user)}>Edit</Button>
                 {role === 'admin' && (
-                  <Button variant="danger" onClick={() => onDelete(user)}>Delete</Button>
+                  <Button variant="danger" onClick={() => onDelete(user)}>Del</Button>
                 )}
               </td>
             </tr>
