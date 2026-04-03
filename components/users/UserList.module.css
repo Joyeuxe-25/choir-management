@@ -10,6 +10,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  min-width: 800px;
 }
 
 .table th,
@@ -28,16 +29,21 @@
 }
 
 .table td {
-  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Give email column a max width */
+.table td:nth-child(2) {
+  max-width: 180px;
 }
 
 .actions {
   display: flex;
   gap: var(--spacing-xs);
   flex-wrap: nowrap;
+  min-width: 160px;
 }
 
 @media (max-width: 768px) {
