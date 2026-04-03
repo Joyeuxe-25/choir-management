@@ -1,3 +1,5 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/shared/Button';
 import SectionCard from '@/components/shared/SectionCard';
 import styles from './QuickActions.module.css';
@@ -7,23 +9,25 @@ interface QuickActionsProps {
 }
 
 export default function QuickActions({ role }: QuickActionsProps) {
+  const router = useRouter();
+
   const actions = {
     admin: [
-      { label: '➕ Add Member', onClick: () => alert('Add member form (demo)') },
-      { label: '📝 Add Song', onClick: () => alert('Add song form (demo)') },
-      { label: '📊 View Attendance', onClick: () => alert('View attendance (demo)') },
-      { label: '📄 Write Minutes', onClick: () => alert('Write minutes (demo)') },
-      { label: '👥 Manage Users', onClick: () => alert('Manage users (demo)') },
+      { label: '➕ Add Member',      onClick: () => router.push('/members') },
+      { label: '📝 Add Song',        onClick: () => router.push('/songs') },
+      { label: '📊 View Attendance', onClick: () => router.push('/attendance') },
+      { label: '📄 Write Minutes',   onClick: () => router.push('/minutes') },
+      { label: '👥 Manage Users',    onClick: () => router.push('/users') },
     ],
     secretary: [
-      { label: '📝 Add Song', onClick: () => alert('Add song form (demo)') },
-      { label: '📄 Write Minutes', onClick: () => alert('Write minutes (demo)') },
-      { label: '🎵 Manage Songs', onClick: () => alert('Manage songs (demo)') },
+      { label: '📝 Add Song',      onClick: () => router.push('/songs') },
+      { label: '📄 Write Minutes', onClick: () => router.push('/minutes') },
+      { label: '🎵 Manage Songs',  onClick: () => router.push('/songs') },
     ],
     voiceLeader: [
-      { label: '👤 Add Member', onClick: () => alert('Add member form (demo)') },
-      { label: '✅ Mark Attendance', onClick: () => alert('Mark attendance (demo)') },
-      { label: '🎵 View Songs', onClick: () => alert('View songs (demo)') },
+      { label: '👤 Add Member',     onClick: () => router.push('/members') },
+      { label: '✅ Mark Attendance', onClick: () => router.push('/attendance') },
+      { label: '🎵 View Songs',     onClick: () => router.push('/songs') },
     ],
   };
 
