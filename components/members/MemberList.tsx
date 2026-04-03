@@ -28,8 +28,8 @@ export default function MemberList({ members, onEdit, onView, onDelete }: Member
           <tr>
             <th>Name</th>
             <th>Voice</th>
-            <th className={styles.hideSmall}>Phone</th>
-            <th className={styles.hideSmall}>Join Date</th>
+            <th>Phone</th>
+            <th>Join Date</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -39,8 +39,8 @@ export default function MemberList({ members, onEdit, onView, onDelete }: Member
             <tr key={member.id}>
               <td>{member.name}</td>
               <td>{member.voice}</td>
-              <td className={styles.hideSmall}>{member.phone}</td>
-              <td className={styles.hideSmall}>{member.join_date}</td>
+              <td>{member.phone}</td>
+              <td>{member.join_date}</td>
               <td>
                 <Badge variant={member.status === 'Active' ? 'success' : 'danger'}>
                   {member.status}

@@ -5,187 +5,129 @@ import SearchBar from '@/components/shared/SearchBar';
 import FilterBar from '@/components/shared/FilterBar';
 import Select from '@/components/shared/Select';
 import Button from '@/components/shared/Button';
-import SongList from '@/components/songs/SongList';
-import SongFormModal from '@/components/songs/SongFormModal';
-import SongDetailModal from '@/components/songs/SongDetailModal';
-import { songsApi } from '@/lib/api';
+import MemberList from '@/components/members/MemberList';
+import MemberFormModal from '@/components/members/MemberFormModal';
+import MemberDetailModal from '@/components/members/MemberDetailModal';
+import { membersApi } from '@/lib/api';
 import { useRole } from '@/context/RoleContext';
-import { Song } from '@/types';
+import { Member } from '@/types';
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsDataURL(file);
-  });
-}
-
-export default function SongsPage() {
+export default function MembersPage() {
   const { role, voiceSection } = useRole();
-  const [songs, setSongs] = useState<Song[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
   const [voiceFilter, setVoiceFilter] = useState('');
-  const [languageFilter, setLanguageFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingSong, setEditingSong] = useState<Song | undefined>(undefined);
-  const [viewingSong, setViewingSong] = useState<Song | undefined>(undefined);
-  const [isSaving, setIsSaving] = useState(false);
+  const [editingMember, setEditingMember] = useState<Member | undefined>(undefined);
+  const [viewingMember, setViewingMember] = useState<Member | undefined>(undefined);
 
-  const loadSongs = async () => {
+  const loadMembers = async () => {
     try {
       setIsLoading(true);
       setError('');
       const params: Record<string, string> = {};
-      if (categoryFilter) params.category = categoryFilter;
-      if (languageFilter) params.language = languageFilter;
-      if (searchQuery) params.title = searchQuery;
-      // Voice leaders see only their section + Full Choir
-      // We load all and filter client-side since backend doesn't support OR filter
-      if (role !== 'voiceLeader' && voiceFilter) {
+      if (role === 'voiceLeader' && voiceSection) {
+        params.voice = voiceSection;
+      } else if (voiceFilter) {
         params.voice = voiceFilter;
       }
-      const res = await songsApi.getAll(params);
-      setSongs(res.data || []);
+      if (statusFilter) params.status = statusFilter;
+      const res = await membersApi.getAll(params);
+      setMembers(res.data || []);
     } catch (err: any) {
-      setError(err.message || 'Failed to load songs');
+      setError(err.message || 'Failed to load members');
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => { loadSongs(); }, [categoryFilter, voiceFilter, languageFilter, role, voiceSection]);
+  useEffect(() => {
+    loadMembers();
+  }, [voiceFilter, statusFilter, role, voiceSection]);
 
-  const filteredSongs = useMemo(() => {
-    let list = songs;
-    if (role === 'voiceLeader' && voiceSection) {
-      list = list.filter(s => s.voice === voiceSection || s.voice === 'Full Choir');
-    }
-    if (searchQuery) {
-      list = list.filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
-    return list;
-  }, [songs, searchQuery, role, voiceSection]);
-
-  const canAdd = role === 'admin' || role === 'secretary' || role === 'voiceLeader';
-
-  const handleSaveSong = async (songData: any) => {
-    try {
-      setIsSaving(true);
-      const { file, ...rest } = songData;
-      let payload: any = { ...rest };
-      if (file instanceof File) {
-        if (file.size > 800 * 1024) {
-          alert('File is too large. Please use a file under 800KB.');
-          return;
-        }
-        const base64 = await fileToBase64(file);
-        payload.file_url = base64;
-        payload.file_name = file.name;
-        payload.file_type = file.type;
-        payload.file_size = file.size;
-        payload.file_uploaded_at = new Date().toISOString().split('T')[0];
-      }
-      if (editingSong) {
-        await songsApi.update(String(editingSong.id), payload);
-      } else {
-        await songsApi.create(payload);
-      }
-      setIsFormModalOpen(false);
-      loadSongs();
-    } catch (err: any) {
-      alert(err.message || 'Failed to save song');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const categoryOptions = [
-    { value: '', label: 'All categories' },
-    { value: 'Worship', label: 'Worship' },
-    { value: 'Praise', label: 'Praise' },
-    { value: 'Entrance', label: 'Entrance' },
-    { value: 'Offertory', label: 'Offertory' },
-    { value: 'Communion', label: 'Communion' },
-    { value: 'Closing', label: 'Closing' },
-    { value: 'Practice', label: 'Practice' },
-    { value: 'Special Event', label: 'Special Event' },
-    { value: 'Christmas', label: 'Christmas' },
-    { value: 'Easter', label: 'Easter' },
-    { value: 'Wedding', label: 'Wedding' },
-    { value: 'Funeral', label: 'Funeral' },
-  ];
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery) return members;
+    return members.filter(m =>
+      m.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [members, searchQuery]);
 
   const voiceOptions = [
     { value: '', label: 'All voices' },
-    { value: 'Full Choir', label: 'Full Choir' },
     { value: 'Soprano', label: 'Soprano' },
     { value: 'Alto', label: 'Alto' },
     { value: 'Tenor', label: 'Tenor' },
     { value: 'Bass', label: 'Bass' },
   ];
 
-  const languageOptions = [
-    { value: '', label: 'All languages' },
-    { value: 'Kinyarwanda', label: 'Kinyarwanda' },
-    { value: 'English', label: 'English' },
-    { value: 'French', label: 'French' },
-    { value: 'Swahili', label: 'Swahili' },
-    { value: 'Latin', label: 'Latin' },
+  const statusOptions = [
+    { value: '', label: 'All statuses' },
+    { value: 'Active', label: 'Active' },
+    { value: 'Inactive', label: 'Inactive' },
   ];
 
   return (
     <>
       <PageHeader
-        title="Songs"
-        description="Manage choir song library."
+        title="Members"
+        description="Manage choir members: add, edit, view profiles."
         actions={
-          canAdd
-            ? <Button variant="primary" onClick={() => { setEditingSong(undefined); setIsFormModalOpen(true); }}>+ Add Song</Button>
-            : undefined
+          <Button variant="primary" onClick={() => { setEditingMember(undefined); setIsFormModalOpen(true); }}>
+            + Add Member
+          </Button>
         }
       />
       <FilterBar title="Filters">
-        <SearchBar placeholder="Search by title..." onSearch={setSearchQuery} />
-        <Select label="Category" options={categoryOptions} value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} />
+        <SearchBar placeholder="Search by name..." onSearch={setSearchQuery} />
         {role !== 'voiceLeader' && (
           <Select label="Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
         )}
-        <Select label="Language" options={languageOptions} value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)} />
+        <Select label="Status" options={statusOptions} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
       </FilterBar>
-      {isLoading && <p style={{ padding: '1rem' }}>Loading songs...</p>}
+      {isLoading && <p style={{ padding: '1rem' }}>Loading members...</p>}
       {error && <p style={{ padding: '1rem', color: 'red' }}>{error}</p>}
       {!isLoading && !error && (
-        <SongList
-          songs={filteredSongs}
-          onEdit={(s) => { setEditingSong(s); setIsFormModalOpen(true); }}
-          onView={(s) => setViewingSong(s)}
-          onDelete={async (song) => {
-            if (confirm(`Delete "${song.title}"?`)) {
+        <MemberList
+          members={filteredMembers}
+          onEdit={(m) => { setEditingMember(m); setIsFormModalOpen(true); }}
+          onView={(m) => setViewingMember(m)}
+          onDelete={async (member) => {
+            if (confirm(`Delete ${member.name}?`)) {
               try {
-                await songsApi.delete(String(song.id));
-                loadSongs();
+                await membersApi.delete(String(member.id));
+                loadMembers();
               } catch (err: any) {
-                alert(err.message || 'Failed to delete song');
+                alert(err.message || 'Failed to delete member');
               }
             }
           }}
         />
       )}
-      <SongFormModal
+      <MemberFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
-        onSave={handleSaveSong}
-        initialData={editingSong}
-        isSaving={isSaving}
+        onSave={async (memberData) => {
+          try {
+            if (editingMember) {
+              await membersApi.update(String(editingMember.id), memberData);
+            } else {
+              await membersApi.create(memberData);
+            }
+            setIsFormModalOpen(false);
+            loadMembers();
+          } catch (err: any) {
+            alert(err.message || 'Failed to save member');
+          }
+        }}
+        initialData={editingMember}
       />
-      <SongDetailModal
-        isOpen={!!viewingSong}
-        onClose={() => setViewingSong(undefined)}
-        song={viewingSong}
+      <MemberDetailModal
+        isOpen={!!viewingMember}
+        onClose={() => setViewingMember(undefined)}
+        member={viewingMember}
       />
     </>
   );

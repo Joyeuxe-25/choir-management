@@ -11,10 +11,12 @@ import MarkAttendanceModal from '@/components/attendance/MarkAttendanceModal';
 import EditAttendanceModal from '@/components/attendance/EditAttendanceModal';
 import AttendanceDetailModal from '@/components/attendance/AttendanceDetailModal';
 import { attendanceApi } from '@/lib/api';
+import { useRole } from '@/context/RoleContext';
 import { eventTypes } from '@/data/eventTypes';
 import { AttendanceRecord } from '@/types';
 
 export default function AttendancePage() {
+  const { role, voiceSection } = useRole();
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -32,7 +34,12 @@ export default function AttendancePage() {
       setIsLoading(true);
       setError('');
       const params: Record<string, string> = {};
-      if (voiceFilter) params.voice = voiceFilter;
+      // Voice leaders only see their section
+      if (role === 'voiceLeader' && voiceSection) {
+        params.voice = voiceSection;
+      } else if (voiceFilter) {
+        params.voice = voiceFilter;
+      }
       if (eventFilter) params.event_type = eventFilter;
       if (statusFilter) params.status = statusFilter;
       if (dateFilter) params.date = dateFilter;
@@ -46,7 +53,9 @@ export default function AttendancePage() {
     }
   };
 
-  useEffect(() => { loadRecords(); }, [voiceFilter, eventFilter, statusFilter, dateFilter]);
+  useEffect(() => {
+    loadRecords();
+  }, [voiceFilter, eventFilter, statusFilter, dateFilter, role, voiceSection]);
 
   const filteredRecords = useMemo(() => {
     if (!searchQuery) return records;
@@ -121,11 +130,17 @@ export default function AttendancePage() {
       <PageHeader
         title="Attendance"
         description="Manage choir attendance records."
-        actions={<Button variant="primary" onClick={() => setIsMarkModalOpen(true)}>+ Mark Attendance</Button>}
+        actions={
+          <Button variant="primary" onClick={() => setIsMarkModalOpen(true)}>
+            + Mark Attendance
+          </Button>
+        }
       />
       <FilterBar title="Filters">
         <SearchBar placeholder="Search by member name..." onSearch={setSearchQuery} />
-        <Select label="Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
+        {role !== 'voiceLeader' && (
+          <Select label="Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
+        )}
         <Select label="Event Type" options={eventOptions} value={eventFilter} onChange={(e) => setEventFilter(e.target.value)} />
         <Select label="Status" options={statusOptions} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
         <Input label="Date" type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />

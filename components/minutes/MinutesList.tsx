@@ -30,9 +30,9 @@ export default function MinutesList({ minutes, onEdit, onView, onDelete }: Minut
           <tr>
             <th>Title</th>
             <th>Meeting Date</th>
-            <th className={styles.hideSmall}>Recorded By</th>
-            <th className={styles.hideMedium}>Last Updated</th>
-            <th className={styles.hideSmall}>Attachment</th>
+            <th>Recorded By</th>
+            <th>Last Updated</th>
+            <th>Attachment</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -41,9 +41,9 @@ export default function MinutesList({ minutes, onEdit, onView, onDelete }: Minut
             <tr key={minute.id}>
               <td>{minute.title}</td>
               <td>{minute.meeting_date}</td>
-              <td className={styles.hideSmall}>{minute.recorded_by_name || '—'}</td>
-              <td className={styles.hideMedium}>{formatDate(minute.updated_at)}</td>
-              <td className={styles.hideSmall}>
+              <td>{minute.recorded_by_name || '—'}</td>
+              <td>{formatDate(minute.updated_at)}</td>
+              <td>
                 {minute.attachment_present
                   ? <Badge variant="success">📎 Attached</Badge>
                   : <Badge variant="default">No attachment</Badge>
