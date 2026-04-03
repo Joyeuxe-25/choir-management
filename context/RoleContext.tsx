@@ -17,7 +17,7 @@ const RoleContext = createContext<RoleContextType | undefined>(undefined);
 const mapRole = (backendRole: string): Role => {
   if (backendRole === 'Admin') return 'admin';
   if (backendRole === 'Secretary') return 'secretary';
-  if (backendRole === 'Voice Leader') return 'voiceLeader';
+  if (backendRole === 'Voice Leader' || backendRole === 'VoiceLeader') return 'voiceLeader';
   return 'admin';
 };
 

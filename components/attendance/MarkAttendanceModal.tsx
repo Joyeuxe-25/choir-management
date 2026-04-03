@@ -28,6 +28,7 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
   const [voiceFilter, setVoiceFilter] = useState('');
   const [memberStatuses, setMemberStatuses] = useState<MemberAttendance[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const voiceOptions = [
     { value: '', label: 'All voices' },
@@ -48,11 +49,12 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
 
   useEffect(() => {
     if (isOpen) loadMembers();
-  }, [isOpen, voiceFilter]);
+  }, [isOpen, voiceFilter, role, voiceSection]);
 
   const loadMembers = async () => {
     try {
       setIsLoadingMembers(true);
+      setLoadError('');
       const params: Record<string, string> = { status: 'Active' };
       // Voice leaders only load their section
       if (role === 'voiceLeader' && voiceSection) {
@@ -68,8 +70,8 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
         status: 'Present' as const,
       }));
       setMemberStatuses(initial);
-    } catch (err) {
-      console.error('Failed to load members');
+    } catch (err: any) {
+      setLoadError(err.message || 'Failed to load members');
     } finally {
       setIsLoadingMembers(false);
     }
@@ -118,7 +120,10 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
               )}
             </h3>
             {isLoadingMembers && <p>Loading members...</p>}
-            {!isLoadingMembers && memberStatuses.length === 0 && (
+            {!isLoadingMembers && loadError && (
+              <p style={{ color: 'red' }}>{loadError}</p>
+            )}
+            {!isLoadingMembers && !loadError && memberStatuses.length === 0 && (
               <p>No members found.</p>
             )}
             {!isLoadingMembers && memberStatuses.map(member => (
