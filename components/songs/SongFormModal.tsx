@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
 import Button from '@/components/shared/Button';
@@ -11,6 +11,7 @@ interface SongFormModalProps {
   onClose: () => void;
   onSave: (song: any) => void;
   initialData?: Song;
+  isSaving?: boolean;
 }
 
 const emptySong = {
@@ -21,8 +22,10 @@ const emptySong = {
   upload_date: new Date().toISOString().split('T')[0],
 };
 
-export default function SongFormModal({ isOpen, onClose, onSave, initialData }: SongFormModalProps) {
+export default function SongFormModal({ isOpen, onClose, onSave, initialData, isSaving }: SongFormModalProps) {
   const [formData, setFormData] = useState(emptySong);
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -36,15 +39,21 @@ export default function SongFormModal({ isOpen, onClose, onSave, initialData }: 
     } else {
       setFormData(emptySong);
     }
+    setFile(null);
+    if (fileRef.current) fileRef.current.value = '';
   }, [initialData, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target.files?.[0] ?? null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({ ...formData, file });
   };
 
   if (!isOpen) return null;
@@ -98,9 +107,29 @@ export default function SongFormModal({ isOpen, onClose, onSave, initialData }: 
             <Select label="Language" name="language" options={languageOptions} value={formData.language} onChange={handleChange} required />
             <Input label="Upload Date" type="date" name="upload_date" value={formData.upload_date} onChange={handleChange} required />
           </div>
+          <div className={styles.fileUpload}>
+            <label className={styles.fileLabel}>
+              Song File <span className={styles.optional}>(PDF or DOC, max 800KB)</span>
+            </label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+            />
+            {file && (
+              <p className={styles.fileName}>📄 {file.name} ({(file.size / 1024).toFixed(1)} KB)</p>
+            )}
+            {!file && initialData?.file_present && (
+              <p className={styles.fileName}>📄 {initialData.file_name || 'File already attached'} — upload a new one to replace it</p>
+            )}
+          </div>
           <div className={styles.actions}>
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="primary">Save Song</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
+            <Button type="submit" variant="primary" disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Song'}
+            </Button>
           </div>
         </form>
       </div>

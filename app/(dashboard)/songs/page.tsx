@@ -11,6 +11,19 @@ import SongDetailModal from '@/components/songs/SongDetailModal';
 import { songsApi } from '@/lib/api';
 import { Song } from '@/types';
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // result is "data:application/pdf;base64,XXXX" — we store the whole data URL
+      resolve(result);
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function SongsPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +35,7 @@ export default function SongsPage() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingSong, setEditingSong] = useState<Song | undefined>(undefined);
   const [viewingSong, setViewingSong] = useState<Song | undefined>(undefined);
+  const [isSaving, setIsSaving] = useState(false);
 
   const loadSongs = async () => {
     try {
@@ -41,15 +55,11 @@ export default function SongsPage() {
     }
   };
 
-  useEffect(() => {
-    loadSongs();
-  }, [categoryFilter, voiceFilter, languageFilter]);
+  useEffect(() => { loadSongs(); }, [categoryFilter, voiceFilter, languageFilter]);
 
   const filteredSongs = useMemo(() => {
     if (!searchQuery) return songs;
-    return songs.filter(s =>
-      s.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return songs.filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [songs, searchQuery]);
 
   const categoryOptions = [
@@ -86,31 +96,42 @@ export default function SongsPage() {
     { value: 'Latin', label: 'Latin' },
   ];
 
-  const handleAddSong = () => {
-    setEditingSong(undefined);
-    setIsFormModalOpen(true);
-  };
-
-  const handleEditSong = (song: Song) => {
-    setEditingSong(song);
-    setIsFormModalOpen(true);
-  };
-
-  const handleViewSong = (song: Song) => {
-    setViewingSong(song);
-  };
+  const handleAddSong = () => { setEditingSong(undefined); setIsFormModalOpen(true); };
+  const handleEditSong = (song: Song) => { setEditingSong(song); setIsFormModalOpen(true); };
+  const handleViewSong = (song: Song) => { setViewingSong(song); };
 
   const handleSaveSong = async (songData: any) => {
     try {
+      setIsSaving(true);
+      const { file, ...rest } = songData;
+
+      let payload: any = { ...rest };
+
+      if (file instanceof File) {
+        // Check size — D1 row limit is ~1MB, warn at 800KB
+        if (file.size > 800 * 1024) {
+          alert('File is too large. Please use a file under 800KB.');
+          return;
+        }
+        const base64 = await fileToBase64(file);
+        payload.file_url = base64;
+        payload.file_name = file.name;
+        payload.file_type = file.type;
+        payload.file_size = file.size;
+        payload.file_uploaded_at = new Date().toISOString().split('T')[0];
+      }
+
       if (editingSong) {
-        await songsApi.update(String(editingSong.id), songData);
+        await songsApi.update(String(editingSong.id), payload);
       } else {
-        await songsApi.create(songData);
+        await songsApi.create(payload);
       }
       setIsFormModalOpen(false);
       loadSongs();
     } catch (err: any) {
       alert(err.message || 'Failed to save song');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -153,6 +174,7 @@ export default function SongsPage() {
         onClose={() => setIsFormModalOpen(false)}
         onSave={handleSaveSong}
         initialData={editingSong}
+        isSaving={isSaving}
       />
       <SongDetailModal
         isOpen={!!viewingSong}

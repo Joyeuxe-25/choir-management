@@ -13,26 +13,28 @@ interface EditAttendanceModalProps {
 }
 
 const statusOptions = [
-  { value: 'present', label: 'Present' },
-  { value: 'absent', label: 'Absent' },
-  { value: 'excused', label: 'Excused' },
-  { value: 'late', label: 'Late' },
+  { value: 'Present', label: 'Present' },
+  { value: 'Absent', label: 'Absent' },
+  { value: 'Excused', label: 'Excused' },
+  { value: 'Late', label: 'Late' },
 ];
 
 export default function EditAttendanceModal({ isOpen, onClose, onSave, initialData }: EditAttendanceModalProps) {
-  const [status, setStatus] = useState<'present' | 'absent' | 'excused' | 'late'>('present');
+  const [status, setStatus] = useState<'Present' | 'Absent' | 'Excused' | 'Late'>('Present');
 
   useEffect(() => {
     if (initialData) {
-      setStatus(initialData.status);
+      // normalize in case old records have lowercase
+      const normalized = initialData.status.charAt(0).toUpperCase() + initialData.status.slice(1).toLowerCase();
+      setStatus(normalized as any);
     }
   }, [initialData, isOpen]);
 
   const handleSubmit = () => {
-    if (!initialData) return;
-    onSave({ ...initialData, status });
-    onClose();
-  };
+  if (!initialData) return;
+  onSave({ ...initialData, status: status.toLowerCase() as any });
+  onClose();
+};
 
   if (!isOpen || !initialData) return null;
 

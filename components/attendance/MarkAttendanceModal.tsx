@@ -17,7 +17,7 @@ interface MemberAttendance {
   member_id: string;
   member_name: string;
   voice: string;
-  status: 'present' | 'absent' | 'excused' | 'late';
+  status: 'Present' | 'Absent' | 'Excused' | 'Late';
 }
 
 export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAttendanceModalProps) {
@@ -38,16 +38,14 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
   const eventOptions = eventTypes.map(et => ({ value: et, label: et }));
 
   const statusOptions = [
-    { value: 'present', label: 'Present' },
-    { value: 'absent', label: 'Absent' },
-    { value: 'excused', label: 'Excused' },
-    { value: 'late', label: 'Late' },
+    { value: 'Present', label: 'Present' },
+    { value: 'Absent', label: 'Absent' },
+    { value: 'Excused', label: 'Excused' },
+    { value: 'Late', label: 'Late' },
   ];
 
   useEffect(() => {
-    if (isOpen) {
-      loadMembers();
-    }
+    if (isOpen) loadMembers();
   }, [isOpen, voiceFilter]);
 
   const loadMembers = async () => {
@@ -60,7 +58,7 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
         member_id: String(m.id),
         member_name: m.name,
         voice: m.voice,
-        status: 'present' as const,
+        status: 'Present' as const,
       }));
       setMemberStatuses(initial);
     } catch (err) {
@@ -70,7 +68,7 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
     }
   };
 
-  const updateMemberStatus = (member_id: string, status: 'present' | 'absent' | 'excused' | 'late') => {
+  const updateMemberStatus = (member_id: string, status: 'Present' | 'Absent' | 'Excused' | 'Late') => {
     setMemberStatuses(prev =>
       prev.map(m => m.member_id === member_id ? { ...m, status } : m)
     );

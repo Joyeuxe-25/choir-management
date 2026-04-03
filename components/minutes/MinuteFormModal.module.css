@@ -93,3 +93,65 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+.fileUpload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.fileLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.fileInput {
+  padding: var(--spacing-xs);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.fileName {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.fileUpload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.fileLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.fileInput {
+  padding: var(--spacing-xs);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.fileName {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}

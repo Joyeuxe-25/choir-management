@@ -20,6 +20,18 @@ export default function MinuteDetailModal({ isOpen, onClose, minute }: MinuteDet
     return date.toLocaleString();
   };
 
+  const handleDownload = () => {
+    if (!minute.attachment_url) return;
+    const a = document.createElement('a');
+    a.href = minute.attachment_url;
+    a.download = minute.attachment_name || `${minute.title}.pdf`;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -46,6 +58,11 @@ export default function MinuteDetailModal({ isOpen, onClose, minute }: MinuteDet
           )}
         </div>
         <div className={styles.footer}>
+          {minute.attachment_present && (
+            <Button variant="primary" onClick={handleDownload}>
+              ⬇ Download Attachment
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose}>Close</Button>
         </div>
       </div>
