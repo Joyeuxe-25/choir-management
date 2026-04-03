@@ -5,25 +5,28 @@ type NavItem = {
 };
 
 const adminNav: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { label: 'Members', href: '/members', icon: '👥' },
-  { label: 'Attendance', href: '/attendance', icon: '✅' },
-  { label: 'Songs', href: '/songs', icon: '🎵' },
-  { label: 'Minutes', href: '/minutes', icon: '📝' },
-  { label: 'Users', href: '/users', icon: '👤' },
+  { label: 'Dashboard',  href: '/dashboard',  icon: '🏠' },
+  { label: 'Members',    href: '/members',     icon: '👥' },
+  { label: 'Attendance', href: '/attendance',  icon: '✅' },
+  { label: 'Songs',      href: '/songs',       icon: '🎵' },
+  { label: 'Minutes',    href: '/minutes',     icon: '📝' },
+  { label: 'Events',     href: '/events',      icon: '📅' },
+  { label: 'Users',      href: '/users',       icon: '👤' },
 ];
 
 const secretaryNav: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { label: 'Songs', href: '/songs', icon: '🎵' },
-  { label: 'Minutes', href: '/minutes', icon: '📝' },
+  { label: 'Songs',     href: '/songs',     icon: '🎵' },
+  { label: 'Minutes',   href: '/minutes',   icon: '📝' },
+  { label: 'Events',    href: '/events',    icon: '📅' },
 ];
 
 const voiceLeaderNav: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { label: 'Members', href: '/members', icon: '👥' },
-  { label: 'Attendance', href: '/attendance', icon: '✅' },
-  { label: 'Songs', href: '/songs', icon: '🎵' },
+  { label: 'Dashboard',  href: '/dashboard',  icon: '🏠' },
+  { label: 'Members',    href: '/members',     icon: '👥' },
+  { label: 'Attendance', href: '/attendance',  icon: '✅' },
+  { label: 'Songs',      href: '/songs',       icon: '🎵' },
+  { label: 'Events',     href: '/events',      icon: '📅' },
 ];
 
 export function getNavigationForRole(role: 'admin' | 'secretary' | 'voiceLeader'): NavItem[] {

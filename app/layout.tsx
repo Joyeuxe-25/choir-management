@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import '../styles/globals.css';
 import '../styles/variables.css';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   title: 'Chorale Angelus Dei',
   description: 'Choir Management System for Chorale Angelus Dei.',
   manifest: '/manifest.json',
-  themeColor: '#166534',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -22,6 +21,10 @@ export const metadata: Metadata = {
       { rel: 'icon', url: '/icons/icon-512x512.png', sizes: '512x512' },
     ],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#166534',
 };
 
 export default function RootLayout({

@@ -41,8 +41,8 @@ export default function DashboardStats({
       )}
       {showAttendanceStats && (
         <>
-          <StatCard title="Present Today"       value={val(s?.present_today)}                    icon="✅" />
-          <StatCard title="Upcoming Rehearsals" value={val(data?.upcoming_rehearsals?.length ?? 0)} icon="📅" />
+          <StatCard title="Present Today"   value={val(s?.present_today)}                   icon="✅" />
+          <StatCard title="Upcoming Events" value={val(data?.upcoming_events?.length ?? 0)} icon="📅" />
         </>
       )}
     </div>

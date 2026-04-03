@@ -103,3 +103,14 @@ export const usersApi = {
 export const dashboardApi = {
   getStats: () => apiFetch('/dashboard'),
 };
+
+export const eventsApi = {
+  getAll: (params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return apiFetch(`/events${query}`);
+  },
+  getOne: (id: string) => apiFetch(`/events/${id}`),
+  create: (data: any) => apiFetch('/events', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: any) => apiFetch(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) => apiFetch(`/events/${id}`, { method: 'DELETE' }),
+};

@@ -18,7 +18,14 @@ export interface DashboardData {
     excused: number;
     late: number;
   };
-  upcoming_rehearsals: any[];
+  upcoming_events: {
+    id: number;
+    title: string;
+    event_type: string;
+    event_date: string;
+    event_time?: string;
+    location?: string;
+  }[];
   recent_minutes: {
     id: number;
     title: string;
