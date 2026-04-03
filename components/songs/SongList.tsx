@@ -15,7 +15,6 @@ interface SongListProps {
 export default function SongList({ songs, onEdit, onView, onDelete }: SongListProps) {
   const { role, voiceSection } = useRole();
 
-  // Voice leaders only see songs for their section
   const visibleSongs = role === 'voiceLeader' && voiceSection
     ? songs.filter(s => s.voice === voiceSection || s.voice === 'Full Choir')
     : songs;
@@ -47,9 +46,9 @@ export default function SongList({ songs, onEdit, onView, onDelete }: SongListPr
               <td>{song.category}</td>
               <td>{song.voice}</td>
               <td>{song.language}</td>
-              <td>{song.uploadDate}</td>
+              <td>{song.upload_date}</td>
               <td>
-                {song.fileAttached ? (
+                {song.file_present ? (
                   <Badge variant="success">📄 Attached</Badge>
                 ) : (
                   <Badge variant="default">No file</Badge>
@@ -59,7 +58,7 @@ export default function SongList({ songs, onEdit, onView, onDelete }: SongListPr
                 <Button variant="outline" onClick={() => onView(song)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(song)}>Edit</Button>
                 {canDelete && (
-                  <Button variant="danger" onClick={() => onDelete(song)}>Delete</Button>
+                  <Button variant="danger" onClick={() => onDelete(song)}>Del</Button>
                 )}
               </td>
             </tr>

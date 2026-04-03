@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
-import Textarea from '@/components/shared/Textarea';
 import Button from '@/components/shared/Button';
 import { Song } from '@/types';
 import styles from './SongFormModal.module.css';
@@ -10,7 +9,7 @@ import styles from './SongFormModal.module.css';
 interface SongFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (song: Omit<Song, 'id' | 'uploadDate' | 'uploadedBy'>) => void;
+  onSave: (song: any) => void;
   initialData?: Song;
 }
 
@@ -19,8 +18,7 @@ const emptySong = {
   category: '',
   voice: '',
   language: '',
-  notes: '',
-  fileAttached: false,
+  upload_date: new Date().toISOString().split('T')[0],
 };
 
 export default function SongFormModal({ isOpen, onClose, onSave, initialData }: SongFormModalProps) {
@@ -28,24 +26,25 @@ export default function SongFormModal({ isOpen, onClose, onSave, initialData }: 
 
   useEffect(() => {
     if (initialData) {
-     const { id, uploadDate, uploadedBy, ...rest } = initialData;
-setFormData({
-  ...rest,
-  notes: rest.notes ?? '',
-});
+      setFormData({
+        title: initialData.title,
+        category: initialData.category,
+        voice: initialData.voice,
+        language: initialData.language,
+        upload_date: initialData.upload_date,
+      });
     } else {
       setFormData(emptySong);
     }
   }, [initialData, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -97,15 +96,7 @@ setFormData({
             <Select label="Category" name="category" options={categoryOptions} value={formData.category} onChange={handleChange} required />
             <Select label="Voice" name="voice" options={voiceOptions} value={formData.voice} onChange={handleChange} required />
             <Select label="Language" name="language" options={languageOptions} value={formData.language} onChange={handleChange} required />
-          </div>
-          <Textarea label="Notes" name="notes" value={formData.notes} onChange={handleChange} rows={3} />
-          <div className={styles.fileSection}>
-            <label className={styles.fileLabel}>Song File (placeholder)</label>
-            <div className={styles.filePlaceholder}>
-              <span>📄</span>
-              <span>No file selected. Upload will be available later.</span>
-              <button type="button" className={styles.uploadButton} disabled>Choose File</button>
-            </div>
+            <Input label="Upload Date" type="date" name="upload_date" value={formData.upload_date} onChange={handleChange} required />
           </div>
           <div className={styles.actions}>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

@@ -8,8 +8,12 @@ export interface Song {
   category: SongCategory | string;
   voice: SongVoice | string;
   language: SongLanguage | string;
-  notes?: string;
-  uploadDate: string;
-  uploadedBy: string;
-  fileAttached: boolean;
+  upload_date: string;
+  file_url?: string;
+  file_name?: string;
+  file_type?: string;
+  file_size?: number;
+  file_present?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

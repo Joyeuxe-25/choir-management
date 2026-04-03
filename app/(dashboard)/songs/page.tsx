@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageHeader from '@/components/shared/PageHeader';
 import SearchBar from '@/components/shared/SearchBar';
 import FilterBar from '@/components/shared/FilterBar';
@@ -8,11 +8,13 @@ import Button from '@/components/shared/Button';
 import SongList from '@/components/songs/SongList';
 import SongFormModal from '@/components/songs/SongFormModal';
 import SongDetailModal from '@/components/songs/SongDetailModal';
-import { songs as initialSongs } from '@/data/songs';
+import { songsApi } from '@/lib/api';
 import { Song } from '@/types';
 
 export default function SongsPage() {
-  const [songs, setSongs] = useState<Song[]>(initialSongs);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [voiceFilter, setVoiceFilter] = useState('');
@@ -20,6 +22,35 @@ export default function SongsPage() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingSong, setEditingSong] = useState<Song | undefined>(undefined);
   const [viewingSong, setViewingSong] = useState<Song | undefined>(undefined);
+
+  const loadSongs = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      const params: Record<string, string> = {};
+      if (categoryFilter) params.category = categoryFilter;
+      if (voiceFilter) params.voice = voiceFilter;
+      if (languageFilter) params.language = languageFilter;
+      if (searchQuery) params.title = searchQuery;
+      const res = await songsApi.getAll(params);
+      setSongs(res.data || []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load songs');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSongs();
+  }, [categoryFilter, voiceFilter, languageFilter]);
+
+  const filteredSongs = useMemo(() => {
+    if (!searchQuery) return songs;
+    return songs.filter(s =>
+      s.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [songs, searchQuery]);
 
   const categoryOptions = [
     { value: '', label: 'All categories' },
@@ -55,16 +86,6 @@ export default function SongsPage() {
     { value: 'Latin', label: 'Latin' },
   ];
 
-  const filteredSongs = useMemo(() => {
-    return songs.filter(song => {
-      const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = categoryFilter ? song.category === categoryFilter : true;
-      const matchesVoice = voiceFilter ? song.voice === voiceFilter : true;
-      const matchesLanguage = languageFilter ? song.language === languageFilter : true;
-      return matchesSearch && matchesCategory && matchesVoice && matchesLanguage;
-    });
-  }, [songs, searchQuery, categoryFilter, voiceFilter, languageFilter]);
-
   const handleAddSong = () => {
     setEditingSong(undefined);
     setIsFormModalOpen(true);
@@ -79,26 +100,28 @@ export default function SongsPage() {
     setViewingSong(song);
   };
 
-  const handleSaveSong = (songData: Omit<Song, 'id' | 'uploadDate' | 'uploadedBy'>) => {
-    if (editingSong) {
-      setSongs(songs.map(s => s.id === editingSong.id ? { ...editingSong, ...songData } : s));
-    } else {
-      const newId = String(Math.max(...songs.map(s => parseInt(s.id)), 0) + 1);
-      const newSong: Song = {
-        id: newId,
-        ...songData,
-        uploadDate: new Date().toISOString().split('T')[0],
-        uploadedBy: 'Current User',
-        fileAttached: false,
-      };
-      setSongs([...songs, newSong]);
+  const handleSaveSong = async (songData: any) => {
+    try {
+      if (editingSong) {
+        await songsApi.update(String(editingSong.id), songData);
+      } else {
+        await songsApi.create(songData);
+      }
+      setIsFormModalOpen(false);
+      loadSongs();
+    } catch (err: any) {
+      alert(err.message || 'Failed to save song');
     }
-    setIsFormModalOpen(false);
   };
 
-  const handleDeleteSong = (song: Song) => {
+  const handleDeleteSong = async (song: Song) => {
     if (confirm(`Delete "${song.title}"?`)) {
-      setSongs(songs.filter(s => s.id !== song.id));
+      try {
+        await songsApi.delete(String(song.id));
+        loadSongs();
+      } catch (err: any) {
+        alert(err.message || 'Failed to delete song');
+      }
     }
   };
 
@@ -115,12 +138,16 @@ export default function SongsPage() {
         <Select label="Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
         <Select label="Language" options={languageOptions} value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)} />
       </FilterBar>
-      <SongList
-        songs={filteredSongs}
-        onEdit={handleEditSong}
-        onView={handleViewSong}
-        onDelete={handleDeleteSong}
-      />
+      {isLoading && <p style={{ padding: '1rem' }}>Loading songs...</p>}
+      {error && <p style={{ padding: '1rem', color: 'red' }}>{error}</p>}
+      {!isLoading && !error && (
+        <SongList
+          songs={filteredSongs}
+          onEdit={handleEditSong}
+          onView={handleViewSong}
+          onDelete={handleDeleteSong}
+        />
+      )}
       <SongFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}

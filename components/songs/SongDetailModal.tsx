@@ -25,16 +25,17 @@ export default function SongDetailModal({ isOpen, onClose, song }: SongDetailMod
           <InfoRow label="Category" value={song.category} />
           <InfoRow label="Voice" value={song.voice} />
           <InfoRow label="Language" value={song.language} />
-          <InfoRow label="Upload Date" value={song.uploadDate} />
-          <InfoRow label="Uploaded By" value={song.uploadedBy} />
-          <InfoRow label="File" value={song.fileAttached ? <Badge variant="success">📄 Attached</Badge> : <Badge variant="default">No file</Badge>} />
-          <InfoRow label="Notes" value={song.notes || '—'} />
-          {song.fileAttached && (
+          <InfoRow label="Upload Date" value={song.upload_date} />
+          <InfoRow label="File" value={song.file_present
+            ? <Badge variant="success">📄 {song.file_name || 'Attached'}</Badge>
+            : <Badge variant="default">No file</Badge>}
+          />
+          {song.file_present && (
             <div className={styles.filePreview}>
-              <label>Song File Preview (placeholder)</label>
+              <label>Song File</label>
               <div className={styles.previewBox}>
-                📄 {song.title}.pdf
-                <button className={styles.downloadButton} disabled>Download (demo)</button>
+                📄 {song.file_name || song.title}
+                <button className={styles.downloadButton} disabled>Download</button>
               </div>
             </div>
           )}
