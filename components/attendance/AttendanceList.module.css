@@ -10,7 +10,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
-  min-width: 800px;
+  min-width: 600px;
 }
 
 .table th,
@@ -32,16 +32,28 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 200px;
 }
 
 .actions {
   display: flex;
   gap: var(--spacing-xs);
-  flex-wrap: nowrap;
-  min-width: 160px;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 768px) {
+.hideSmall {
+  display: table-cell;
+}
+
+.hideMedium {
+  display: table-cell;
+}
+
+@media (max-width: 640px) {
+  .hideSmall {
+    display: none;
+  }
+
   .table th,
   .table td {
     padding: var(--spacing-xs) var(--spacing-sm);
@@ -50,6 +62,11 @@
 
   .actions {
     flex-direction: column;
-    gap: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 900px) {
+  .hideMedium {
+    display: none;
   }
 }

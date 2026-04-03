@@ -1,3 +1,4 @@
+'use client';
 import { Member } from '@/types';
 import Badge from '@/components/shared/Badge';
 import Button from '@/components/shared/Button';
@@ -13,15 +14,10 @@ interface MemberListProps {
 }
 
 export default function MemberList({ members, onEdit, onView, onDelete }: MemberListProps) {
-  const { role, voiceSection } = useRole();
+  const { role } = useRole();
+  const canDelete = role === 'admin';
 
-  const visibleMembers = role === 'voiceLeader' && voiceSection
-    ? members.filter(m => m.voice === voiceSection)
-    : members;
-
-  const canDelete = role === 'admin' || role === 'voiceLeader';
-
-  if (visibleMembers.length === 0) {
+  if (members.length === 0) {
     return <EmptyState title="No members found" description="Try adjusting your filters or add a new member." />;
   }
 
@@ -32,19 +28,19 @@ export default function MemberList({ members, onEdit, onView, onDelete }: Member
           <tr>
             <th>Name</th>
             <th>Voice</th>
-            <th>Phone</th>
-            <th>Join Date</th>
+            <th className={styles.hideSmall}>Phone</th>
+            <th className={styles.hideSmall}>Join Date</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {visibleMembers.map((member) => (
+          {members.map((member) => (
             <tr key={member.id}>
               <td>{member.name}</td>
               <td>{member.voice}</td>
-              <td>{member.phone}</td>
-              <td>{member.join_date}</td>
+              <td className={styles.hideSmall}>{member.phone}</td>
+              <td className={styles.hideSmall}>{member.join_date}</td>
               <td>
                 <Badge variant={member.status === 'Active' ? 'success' : 'danger'}>
                   {member.status}

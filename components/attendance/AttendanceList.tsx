@@ -33,11 +33,11 @@ export default function AttendanceList({ records, onEdit, onView, onDelete }: At
         <thead>
           <tr>
             <th>Member</th>
-            <th>Voice</th>
+            <th className={styles.hideSmall}>Voice</th>
             <th>Date</th>
-            <th>Event</th>
+            <th className={styles.hideSmall}>Event</th>
             <th>Status</th>
-            <th>Marked By</th>
+            <th className={styles.hideMedium}>Marked By</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -45,15 +45,15 @@ export default function AttendanceList({ records, onEdit, onView, onDelete }: At
           {records.map((record) => (
             <tr key={record.id}>
               <td>{record.member_name}</td>
-              <td>{record.member_voice}</td>
+              <td className={styles.hideSmall}>{record.member_voice}</td>
               <td>{record.date}</td>
-              <td>{record.event_type}</td>
+              <td className={styles.hideSmall}>{record.event_type}</td>
               <td>
                 <Badge variant={statusVariant[record.status] ?? 'info'}>
                   {record.status}
                 </Badge>
               </td>
-              <td>{record.marked_by_name || '—'}</td>
+              <td className={styles.hideMedium}>{record.marked_by_name || '—'}</td>
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(record)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(record)}>Edit</Button>

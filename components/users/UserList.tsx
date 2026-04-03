@@ -1,3 +1,4 @@
+'use client';
 import { User } from '@/types';
 import Badge from '@/components/shared/Badge';
 import Button from '@/components/shared/Button';
@@ -38,11 +39,11 @@ export default function UserList({ users, onEdit, onView, onDelete }: UserListPr
         <thead>
           <tr>
             <th>Name</th>
-            <th>Email</th>
+            <th className={styles.hideSmall}>Email</th>
             <th>Role</th>
-            <th>Voice</th>
+            <th className={styles.hideSmall}>Voice</th>
             <th>Status</th>
-            <th>Created</th>
+            <th className={styles.hideMedium}>Created</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -50,19 +51,19 @@ export default function UserList({ users, onEdit, onView, onDelete }: UserListPr
           {users.map((user) => (
             <tr key={user.id}>
               <td>{user.name}</td>
-              <td>{user.email}</td>
+              <td className={styles.hideSmall}>{user.email}</td>
               <td>
                 <Badge variant={roleVariant[user.role] ?? 'default'}>
                   {user.role}
                 </Badge>
               </td>
-              <td>{user.voice || '—'}</td>
+              <td className={styles.hideSmall}>{user.voice || '—'}</td>
               <td>
                 <Badge variant={user.status === 'Active' ? 'success' : 'danger'}>
                   {user.status}
                 </Badge>
               </td>
-              <td>{formatDate(user.created_at)}</td>
+              <td className={styles.hideMedium}>{formatDate(user.created_at)}</td>
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(user)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(user)}>Edit</Button>

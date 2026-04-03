@@ -1,3 +1,4 @@
+'use client';
 import { Song } from '@/types';
 import Badge from '@/components/shared/Badge';
 import Button from '@/components/shared/Button';
@@ -13,15 +14,10 @@ interface SongListProps {
 }
 
 export default function SongList({ songs, onEdit, onView, onDelete }: SongListProps) {
-  const { role, voiceSection } = useRole();
+  const { role } = useRole();
+  const canDelete = role === 'admin' || role === 'secretary';
 
-  const visibleSongs = role === 'voiceLeader' && voiceSection
-    ? songs.filter(s => s.voice === voiceSection || s.voice === 'Full Choir')
-    : songs;
-
-  const canDelete = role === 'admin' || role === 'voiceLeader';
-
-  if (visibleSongs.length === 0) {
+  if (songs.length === 0) {
     return <EmptyState title="No songs found" description="Try adjusting filters or add a new song." />;
   }
 
@@ -31,28 +27,27 @@ export default function SongList({ songs, onEdit, onView, onDelete }: SongListPr
         <thead>
           <tr>
             <th>Title</th>
-            <th>Category</th>
+            <th className={styles.hideSmall}>Category</th>
             <th>Voice</th>
-            <th>Language</th>
-            <th>Upload Date</th>
-            <th>File</th>
+            <th className={styles.hideSmall}>Language</th>
+            <th className={styles.hideMedium}>Upload Date</th>
+            <th className={styles.hideSmall}>File</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {visibleSongs.map((song) => (
+          {songs.map((song) => (
             <tr key={song.id}>
               <td>{song.title}</td>
-              <td>{song.category}</td>
+              <td className={styles.hideSmall}>{song.category}</td>
               <td>{song.voice}</td>
-              <td>{song.language}</td>
-              <td>{song.upload_date}</td>
-              <td>
-                {song.file_present ? (
-                  <Badge variant="success">📄 Attached</Badge>
-                ) : (
-                  <Badge variant="default">No file</Badge>
-                )}
+              <td className={styles.hideSmall}>{song.language}</td>
+              <td className={styles.hideMedium}>{song.upload_date}</td>
+              <td className={styles.hideSmall}>
+                {song.file_present
+                  ? <Badge variant="success">📄 Attached</Badge>
+                  : <Badge variant="default">No file</Badge>
+                }
               </td>
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(song)}>View</Button>
