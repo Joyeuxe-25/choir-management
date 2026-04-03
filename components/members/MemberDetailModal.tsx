@@ -25,17 +25,14 @@ export default function MemberDetailModal({ isOpen, onClose, member }: MemberDet
             <div className={styles.avatar}>{member.name.charAt(0)}</div>
             <div>
               <div className={styles.name}>{member.name}</div>
-              <Badge variant={member.status === 'active' ? 'success' : 'danger'}>{member.status}</Badge>
+              <Badge variant={member.status === 'Active' ? 'success' : 'danger'}>{member.status}</Badge>
             </div>
           </div>
           <div className={styles.detailsGrid}>
             <InfoRow label="Voice" value={member.voice} />
-            <InfoRow label="Gender" value={member.gender || '—'} />
             <InfoRow label="Phone" value={member.phone} />
-            <InfoRow label="Email" value={member.email} />
-            <InfoRow label="Join Date" value={member.joinDate} />
-            <InfoRow label="Address" value={member.address || '—'} />
-            <InfoRow label="Notes" value={member.notes || '—'} />
+            <InfoRow label="Join Date" value={member.join_date} />
+            <InfoRow label="Status" value={member.status} />
           </div>
         </div>
         <div className={styles.footer}>

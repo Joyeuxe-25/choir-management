@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageHeader from '@/components/shared/PageHeader';
 import SearchBar from '@/components/shared/SearchBar';
 import FilterBar from '@/components/shared/FilterBar';
@@ -8,11 +8,13 @@ import Button from '@/components/shared/Button';
 import MemberList from '@/components/members/MemberList';
 import MemberFormModal from '@/components/members/MemberFormModal';
 import MemberDetailModal from '@/components/members/MemberDetailModal';
-import { members as initialMembers } from '@/data/members';
+import { membersApi } from '@/lib/api';
 import { Member } from '@/types';
 
 export default function MembersPage() {
-  const [members, setMembers] = useState<Member[]>(initialMembers);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [voiceFilter, setVoiceFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -20,14 +22,33 @@ export default function MembersPage() {
   const [editingMember, setEditingMember] = useState<Member | undefined>(undefined);
   const [viewingMember, setViewingMember] = useState<Member | undefined>(undefined);
 
+  const loadMembers = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      const params: Record<string, string> = {};
+      if (voiceFilter) params.voice = voiceFilter;
+      if (statusFilter) params.status = statusFilter;
+      if (searchQuery) params.search = searchQuery;
+      const res = await membersApi.getAll(params);
+      setMembers(res.data || []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load members');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMembers();
+  }, [voiceFilter, statusFilter]);
+
   const filteredMembers = useMemo(() => {
-    return members.filter((member) => {
-      const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesVoice = voiceFilter ? member.voice === voiceFilter : true;
-      const matchesStatus = statusFilter ? member.status === statusFilter : true;
-      return matchesSearch && matchesVoice && matchesStatus;
-    });
-  }, [members, searchQuery, voiceFilter, statusFilter]);
+    if (!searchQuery) return members;
+    return members.filter(m =>
+      m.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [members, searchQuery]);
 
   const handleAddMember = () => {
     setEditingMember(undefined);
@@ -43,19 +64,28 @@ export default function MembersPage() {
     setViewingMember(member);
   };
 
-  const handleSaveMember = (memberData: Omit<Member, 'id'>) => {
-    if (editingMember) {
-      setMembers(members.map(m => m.id === editingMember.id ? { ...memberData, id: editingMember.id } : m));
-    } else {
-      const newId = String(Math.max(...members.map(m => parseInt(m.id)), 0) + 1);
-      setMembers([...members, { ...memberData, id: newId }]);
+  const handleSaveMember = async (memberData: any) => {
+    try {
+      if (editingMember) {
+        await membersApi.update(String(editingMember.id), memberData);
+      } else {
+        await membersApi.create(memberData);
+      }
+      setIsFormModalOpen(false);
+      loadMembers();
+    } catch (err: any) {
+      alert(err.message || 'Failed to save member');
     }
-    setIsFormModalOpen(false);
   };
 
-  const handleDeleteMember = (member: Member) => {
+  const handleDeleteMember = async (member: Member) => {
     if (confirm(`Delete ${member.name}?`)) {
-      setMembers(members.filter(m => m.id !== member.id));
+      try {
+        await membersApi.delete(String(member.id));
+        loadMembers();
+      } catch (err: any) {
+        alert(err.message || 'Failed to delete member');
+      }
     }
   };
 
@@ -69,8 +99,8 @@ export default function MembersPage() {
 
   const statusOptions = [
     { value: '', label: 'All statuses' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'Active', label: 'Active' },
+    { value: 'Inactive', label: 'Inactive' },
   ];
 
   return (
@@ -81,29 +111,20 @@ export default function MembersPage() {
         actions={<Button variant="primary" onClick={handleAddMember}>+ Add Member</Button>}
       />
       <FilterBar title="Filters">
-        <SearchBar
-          placeholder="Search by name..."
-          onSearch={(query) => setSearchQuery(query)}
-        />
-        <Select
-          label="Voice"
-          options={voiceOptions}
-          value={voiceFilter}
-          onChange={(e) => setVoiceFilter(e.target.value)}
-        />
-        <Select
-          label="Status"
-          options={statusOptions}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        />
+        <SearchBar placeholder="Search by name..." onSearch={setSearchQuery} />
+        <Select label="Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
+        <Select label="Status" options={statusOptions} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
       </FilterBar>
-      <MemberList
-        members={filteredMembers}
-        onEdit={handleEditMember}
-        onView={handleViewMember}
-        onDelete={handleDeleteMember}
-      />
+      {isLoading && <p style={{ padding: '1rem' }}>Loading members...</p>}
+      {error && <p style={{ padding: '1rem', color: 'red' }}>{error}</p>}
+      {!isLoading && !error && (
+        <MemberList
+          members={filteredMembers}
+          onEdit={handleEditMember}
+          onView={handleViewMember}
+          onDelete={handleDeleteMember}
+        />
+      )}
       <MemberFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}

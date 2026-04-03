@@ -15,7 +15,6 @@ interface MemberListProps {
 export default function MemberList({ members, onEdit, onView, onDelete }: MemberListProps) {
   const { role, voiceSection } = useRole();
 
-  // Voice leaders only see their own section
   const visibleMembers = role === 'voiceLeader' && voiceSection
     ? members.filter(m => m.voice === voiceSection)
     : members;
@@ -45,9 +44,9 @@ export default function MemberList({ members, onEdit, onView, onDelete }: Member
               <td>{member.name}</td>
               <td>{member.voice}</td>
               <td>{member.phone}</td>
-              <td>{member.joinDate}</td>
+              <td>{member.join_date}</td>
               <td>
-                <Badge variant={member.status === 'active' ? 'success' : 'danger'}>
+                <Badge variant={member.status === 'Active' ? 'success' : 'danger'}>
                   {member.status}
                 </Badge>
               </td>
@@ -55,7 +54,7 @@ export default function MemberList({ members, onEdit, onView, onDelete }: Member
                 <Button variant="outline" onClick={() => onView(member)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(member)}>Edit</Button>
                 {canDelete && (
-                  <Button variant="danger" onClick={() => onDelete(member)}>Delete</Button>
+                  <Button variant="danger" onClick={() => onDelete(member)}>Del</Button>
                 )}
               </td>
             </tr>

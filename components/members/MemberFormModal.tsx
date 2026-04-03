@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
-import Textarea from '@/components/shared/Textarea';
 import Button from '@/components/shared/Button';
 import { Member } from '@/types';
 import styles from './MemberFormModal.module.css';
@@ -10,20 +9,16 @@ import styles from './MemberFormModal.module.css';
 interface MemberFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (member: Omit<Member, 'id'>) => void;
+  onSave: (member: any) => void;
   initialData?: Member;
 }
 
-const emptyMember: Omit<Member, 'id'> = {
+const emptyMember = {
   name: '',
-  gender: '',
-  phone: '',
-  email: '',
   voice: 'Soprano',
-  joinDate: new Date().toISOString().split('T')[0],
-  status: 'active',
-  address: '',
-  notes: '',
+  phone: '',
+  join_date: new Date().toISOString().split('T')[0],
+  status: 'Active',
 };
 
 export default function MemberFormModal({ isOpen, onClose, onSave, initialData }: MemberFormModalProps) {
@@ -31,21 +26,25 @@ export default function MemberFormModal({ isOpen, onClose, onSave, initialData }
 
   useEffect(() => {
     if (initialData) {
-      const { id, ...rest } = initialData;
-      setFormData(rest);
+      setFormData({
+        name: initialData.name,
+        voice: initialData.voice,
+        phone: initialData.phone,
+        join_date: initialData.join_date,
+        status: initialData.status,
+      });
     } else {
       setFormData(emptyMember);
     }
   }, [initialData, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -58,14 +57,8 @@ export default function MemberFormModal({ isOpen, onClose, onSave, initialData }
   ];
 
   const statusOptions = [
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-  ];
-
-  const genderOptions = [
-    { value: 'female', label: 'Female' },
-    { value: 'male', label: 'Male' },
-    { value: 'other', label: 'Other' },
+    { value: 'Active', label: 'Active' },
+    { value: 'Inactive', label: 'Inactive' },
   ];
 
   return (
@@ -78,15 +71,11 @@ export default function MemberFormModal({ isOpen, onClose, onSave, initialData }
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.twoColumns}>
             <Input label="Full Name" name="name" value={formData.name} onChange={handleChange} required />
-            <Select label="Gender" name="gender" options={genderOptions} value={formData.gender} onChange={handleChange} required />
             <Input label="Phone" name="phone" value={formData.phone} onChange={handleChange} required />
-            <Input label="Email (optional)" type="email" name="email" value={formData.email} onChange={handleChange} />
             <Select label="Voice" name="voice" options={voiceOptions} value={formData.voice} onChange={handleChange} required />
-            <Input label="Join Date" type="date" name="joinDate" value={formData.joinDate} onChange={handleChange} required />
+            <Input label="Join Date" type="date" name="join_date" value={formData.join_date} onChange={handleChange} required />
             <Select label="Status" name="status" options={statusOptions} value={formData.status} onChange={handleChange} required />
           </div>
-          <Input label="Address" name="address" value={formData.address} onChange={handleChange} />
-          <Textarea label="Notes" name="notes" value={formData.notes} onChange={handleChange} rows={3} />
           <div className={styles.actions}>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
             <Button type="submit" variant="primary">Save Member</Button>
