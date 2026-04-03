@@ -13,8 +13,11 @@ interface MinuteDetailModalProps {
 export default function MinuteDetailModal({ isOpen, onClose, minute }: MinuteDetailModalProps) {
   if (!isOpen || !minute) return null;
 
-  const formatDateTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString();
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleString();
   };
 
   return (
@@ -26,22 +29,19 @@ export default function MinuteDetailModal({ isOpen, onClose, minute }: MinuteDet
         </div>
         <div className={styles.content}>
           <InfoRow label="Title" value={minute.title} />
-          <InfoRow label="Meeting Date" value={minute.meetingDate} />
-          <InfoRow label="Recorded By" value={minute.recordedBy} />
-          <InfoRow label="Created" value={formatDateTime(minute.createdAt)} />
-          <InfoRow label="Last Updated" value={formatDateTime(minute.updatedAt)} />
-          <InfoRow label="Attachment" value={minute.hasAttachment ? <Badge variant="success">📎 Attached</Badge> : <Badge variant="default">No attachment</Badge>} />
-          <div className={styles.contentSection}>
-            <label>Meeting Content</label>
-            <div className={styles.contentBody}>{minute.content}</div>
-          </div>
-          {minute.hasAttachment && (
-            <div className={styles.filePreview}>
-              <label>Attachment Preview (placeholder)</label>
-              <div className={styles.previewBox}>
-                📎 {minute.title}.pdf
-                <button className={styles.downloadButton} disabled>Download (demo)</button>
-              </div>
+          <InfoRow label="Meeting Date" value={minute.meeting_date} />
+          <InfoRow label="Recorded By" value={minute.recorded_by_name || '—'} />
+          <InfoRow label="Created" value={formatDate(minute.created_at)} />
+          <InfoRow label="Last Updated" value={formatDate(minute.updated_at)} />
+          <InfoRow label="Attachment" value={
+            minute.attachment_present
+              ? <Badge variant="success">📎 {minute.attachment_name || 'Attached'}</Badge>
+              : <Badge variant="default">No attachment</Badge>
+          } />
+          {minute.content && (
+            <div className={styles.contentSection}>
+              <label>Meeting Content</label>
+              <div className={styles.contentBody}>{minute.content}</div>
             </div>
           )}
         </div>

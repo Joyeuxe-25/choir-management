@@ -1,8 +1,7 @@
+'use client';
+
 import StatCard from '@/components/shared/StatCard';
-import { dashboardStats, membersByVoice } from '@/data/dashboard';
-import { attendanceRecords } from '@/data/attendance';
-import { members } from '@/data/members';
-import { songs } from '@/data/songs';
+import { useDashboard } from '@/hooks/useDashboard';
 import styles from './DashboardStats.module.css';
 
 interface DashboardStatsProps {
@@ -11,44 +10,39 @@ interface DashboardStatsProps {
   showAttendanceStats?: boolean;
 }
 
-export default function DashboardStats({ showMemberStats = true, showSongStats = true, showAttendanceStats = true }: DashboardStatsProps) {
-  // Calculate real counts
-  const totalMembers = members.length;
-  const totalSongs = songs.length;
+export default function DashboardStats({
+  showMemberStats = true,
+  showSongStats = true,
+  showAttendanceStats = true,
+}: DashboardStatsProps) {
+  const { data, loading, error } = useDashboard();
 
-  const today = new Date().toISOString().split('T')[0];
-  const todayRecords = attendanceRecords.filter(r => r.date === today);
-  const latestDate = todayRecords.length > 0
-    ? today
-    : attendanceRecords.reduce((latest, r) => r.date > latest ? r.date : latest, '');
-  const relevantRecords = attendanceRecords.filter(r => r.date === latestDate);
-  const presentToday = relevantRecords.filter(r => r.status === 'present').length;
+  const s = data?.summary;
 
-  const voiceCounts = {
-    Soprano: members.filter(m => m.voice === 'Soprano').length,
-    Alto: members.filter(m => m.voice === 'Alto').length,
-    Tenor: members.filter(m => m.voice === 'Tenor').length,
-    Bass: members.filter(m => m.voice === 'Bass').length,
+  const val = (n?: number) => {
+    if (loading) return '…';
+    if (error || n === undefined) return '—';
+    return n;
   };
 
   return (
     <div className={styles.statsGrid}>
       {showMemberStats && (
         <>
-          <StatCard title="Total Members" value={totalMembers} icon="👥" />
-          <StatCard title="Soprano" value={voiceCounts.Soprano} icon="🎤" />
-          <StatCard title="Alto" value={voiceCounts.Alto} icon="🎤" />
-          <StatCard title="Tenor" value={voiceCounts.Tenor} icon="🎤" />
-          <StatCard title="Bass" value={voiceCounts.Bass} icon="🎤" />
+          <StatCard title="Total Members" value={val(s?.total_members)} icon="👥" />
+          <StatCard title="Soprano"       value={val(s?.soprano)}       icon="🎤" />
+          <StatCard title="Alto"          value={val(s?.alto)}          icon="🎤" />
+          <StatCard title="Tenor"         value={val(s?.tenor)}         icon="🎤" />
+          <StatCard title="Bass"          value={val(s?.bass)}          icon="🎤" />
         </>
       )}
       {showSongStats && (
-        <StatCard title="Total Songs" value={totalSongs} icon="🎵" />
+        <StatCard title="Total Songs" value={val(s?.total_songs)} icon="🎵" />
       )}
       {showAttendanceStats && (
         <>
-          <StatCard title="Present Today" value={presentToday} icon="✅" />
-          <StatCard title="Upcoming Rehearsals" value={dashboardStats.upcomingRehearsals} icon="📅" />
+          <StatCard title="Present Today"       value={val(s?.present_today)}                    icon="✅" />
+          <StatCard title="Upcoming Rehearsals" value={val(data?.upcoming_rehearsals?.length ?? 0)} icon="📅" />
         </>
       )}
     </div>

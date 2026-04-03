@@ -15,8 +15,11 @@ export default function MinutesList({ minutes, onEdit, onView }: MinutesListProp
     return <EmptyState title="No minutes found" description="Try adjusting filters or add new minutes." />;
   }
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString();
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString();
   };
 
   return (
@@ -36,11 +39,11 @@ export default function MinutesList({ minutes, onEdit, onView }: MinutesListProp
           {minutes.map((minute) => (
             <tr key={minute.id}>
               <td>{minute.title}</td>
-              <td>{minute.meetingDate}</td>
-              <td>{minute.recordedBy}</td>
-              <td>{formatDate(minute.updatedAt)}</td>
+              <td>{minute.meeting_date}</td>
+              <td>{minute.recorded_by_name || '—'}</td>
+              <td>{formatDate(minute.updated_at)}</td>
               <td>
-                {minute.hasAttachment ? (
+                {minute.attachment_present ? (
                   <Badge variant="success">📎 Attached</Badge>
                 ) : (
                   <Badge variant="default">No attachment</Badge>

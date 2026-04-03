@@ -9,16 +9,14 @@ import styles from './MinuteFormModal.module.css';
 interface MinuteFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (minute: Omit<Minute, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (minute: any) => void;
   initialData?: Minute;
 }
 
 const emptyMinute = {
   title: '',
-  meetingDate: new Date().toISOString().split('T')[0],
+  meeting_date: new Date().toISOString().split('T')[0],
   content: '',
-  recordedBy: '',
-  hasAttachment: false,
 };
 
 export default function MinuteFormModal({ isOpen, onClose, onSave, initialData }: MinuteFormModalProps) {
@@ -26,8 +24,11 @@ export default function MinuteFormModal({ isOpen, onClose, onSave, initialData }
 
   useEffect(() => {
     if (initialData) {
-      const { id, createdAt, updatedAt, ...rest } = initialData;
-      setFormData(rest);
+      setFormData({
+        title: initialData.title,
+        meeting_date: initialData.meeting_date,
+        content: initialData.content || '',
+      });
     } else {
       setFormData(emptyMinute);
     }
@@ -40,7 +41,6 @@ export default function MinuteFormModal({ isOpen, onClose, onSave, initialData }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -55,18 +55,9 @@ export default function MinuteFormModal({ isOpen, onClose, onSave, initialData }
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.twoColumns}>
             <Input label="Meeting Title" name="title" value={formData.title} onChange={handleChange} required />
-            <Input label="Meeting Date" type="date" name="meetingDate" value={formData.meetingDate} onChange={handleChange} required />
-            <Input label="Recorded By" name="recordedBy" value={formData.recordedBy} onChange={handleChange} required />
+            <Input label="Meeting Date" type="date" name="meeting_date" value={formData.meeting_date} onChange={handleChange} required />
           </div>
-          <Textarea label="Content / Minutes" name="content" value={formData.content} onChange={handleChange} rows={6} required />
-          <div className={styles.fileSection}>
-            <label className={styles.fileLabel}>Attachment (placeholder)</label>
-            <div className={styles.filePlaceholder}>
-              <span>📎</span>
-              <span>No file selected. Upload will be available later.</span>
-              <button type="button" className={styles.uploadButton} disabled>Choose File</button>
-            </div>
-          </div>
+          <Textarea label="Content / Minutes" name="content" value={formData.content} onChange={handleChange} rows={6} />
           <div className={styles.actions}>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
             <Button type="submit" variant="primary">Save Minutes</Button>

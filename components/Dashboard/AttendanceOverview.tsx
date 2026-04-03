@@ -1,48 +1,53 @@
+'use client';
+
 import SectionCard from '@/components/shared/SectionCard';
-import { attendanceRecords } from '@/data/attendance';
+import { useDashboard } from '@/hooks/useDashboard';
 import styles from './AttendanceOverview.module.css';
 
 export default function AttendanceOverview() {
-  // Get today's date
-  const today = new Date().toISOString().split('T')[0];
+  const { data, loading, error } = useDashboard();
 
-  // Filter to today's records
-  const todayRecords = attendanceRecords.filter(r => r.date === today);
+  const att = data?.today_attendance;
+  const present = att?.present  ?? 0;
+  const absent  = att?.absent   ?? 0;
+  const late    = att?.late     ?? 0;
+  const excused = att?.excused  ?? 0;
 
-  // If no records today, fall back to most recent date
-  const latestDate = todayRecords.length > 0
-    ? today
-    : attendanceRecords.reduce((latest, r) => r.date > latest ? r.date : latest, '');
+  const total = present + absent + late + excused;
+  const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0);
 
-  const relevantRecords = attendanceRecords.filter(r => r.date === latestDate);
-
-  const present = relevantRecords.filter(r => r.status === 'present').length;
-  const absent = relevantRecords.filter(r => r.status === 'absent').length;
-  const late = relevantRecords.filter(r => r.status === 'late').length;
-
-  const total = present + absent + late;
-  const presentPercent = total ? Math.round((present / total) * 100) : 0;
-  const absentPercent = total ? Math.round((absent / total) * 100) : 0;
-  const latePercent = total ? Math.round((late / total) * 100) : 0;
+  const rows = [
+    { label: 'Present', value: present, color: '#28a745', percent: pct(present) },
+    { label: 'Absent',  value: absent,  color: '#dc3545', percent: pct(absent)  },
+    { label: 'Late',    value: late,    color: '#ffc107', percent: pct(late)    },
+    { label: 'Excused', value: excused, color: '#6c757d', percent: pct(excused) },
+  ];
 
   return (
     <SectionCard title="Today's Attendance">
+      {error && (
+        <p style={{ color: '#dc3545', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
+          Could not load attendance data.
+        </p>
+      )}
       <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.label}>Present</span>
-          <span className={styles.value}>{present}</span>
-          <div className={styles.bar} style={{ width: `${presentPercent}%`, backgroundColor: '#28a745' }} />
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.label}>Absent</span>
-          <span className={styles.value}>{absent}</span>
-          <div className={styles.bar} style={{ width: `${absentPercent}%`, backgroundColor: '#dc3545' }} />
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.label}>Late</span>
-          <span className={styles.value}>{late}</span>
-          <div className={styles.bar} style={{ width: `${latePercent}%`, backgroundColor: '#ffc107' }} />
-        </div>
+        {rows.map(({ label, value, color, percent }) => (
+          <div key={label} className={styles.stat}>
+            <span className={styles.label}>{label}</span>
+            <span className={styles.value}>
+              {loading ? '…' : error ? '—' : value}
+            </span>
+            <div
+              className={styles.bar}
+              style={{
+                width: loading ? '20%' : `${percent}%`,
+                backgroundColor: color,
+                opacity: loading ? 0.25 : 1,
+                transition: 'width 0.3s',
+              }}
+            />
+          </div>
+        ))}
       </div>
     </SectionCard>
   );

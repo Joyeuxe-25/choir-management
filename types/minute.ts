@@ -1,10 +1,13 @@
 export interface Minute {
   id: string;
   title: string;
-  meetingDate: string;
-  content: string;
-  recordedBy: string;
-  createdAt: string;
-  updatedAt: string;
-  hasAttachment: boolean;
+  meeting_date: string;
+  content?: string;
+  recorded_by_id?: string;
+  recorded_by_name?: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  attachment_present?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
