@@ -44,8 +44,11 @@ export function useDashboard() {
     setLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/api/dashboard`, {
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       const json = await res.json();
