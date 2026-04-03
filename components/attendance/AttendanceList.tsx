@@ -39,12 +39,12 @@ export default function AttendanceList({ records, onEdit, onView }: AttendanceLi
         <tbody>
           {records.map((record) => (
             <tr key={record.id}>
-              <td>{record.memberName}</td>
-              <td>{record.voice}</td>
+              <td>{record.member_name}</td>
+              <td>{record.member_voice}</td>
               <td>{record.date}</td>
-              <td>{record.eventType}</td>
+              <td>{record.event_type}</td>
               <td><Badge variant={statusVariant[record.status]}>{record.status}</Badge></td>
-              <td>{record.markedBy}</td>
+              <td>{record.marked_by_name || '—'}</td>
               <td className={styles.actions}>
                 <Button variant="outline" onClick={() => onView(record)}>View</Button>
                 <Button variant="outline" onClick={() => onEdit(record)}>Edit</Button>

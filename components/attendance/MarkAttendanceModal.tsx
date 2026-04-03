@@ -2,25 +2,22 @@
 import { useState, useEffect } from 'react';
 import Input from '@/components/shared/Input';
 import Select from '@/components/shared/Select';
-import Textarea from '@/components/shared/Textarea';
 import Button from '@/components/shared/Button';
-import { members } from '@/data/members';
+import { membersApi } from '@/lib/api';
 import { eventTypes } from '@/data/eventTypes';
-import { AttendanceRecord } from '@/types';
 import styles from './MarkAttendanceModal.module.css';
 
 interface MarkAttendanceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (records: Omit<AttendanceRecord, 'id'>[]) => void;
+  onSave: (records: any[]) => void;
 }
 
 interface MemberAttendance {
-  memberId: string;
-  memberName: string;
+  member_id: string;
+  member_name: string;
   voice: string;
   status: 'present' | 'absent' | 'excused' | 'late';
-  note: string;
 }
 
 export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAttendanceModalProps) {
@@ -28,7 +25,7 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
   const [eventType, setEventType] = useState(eventTypes[0]);
   const [voiceFilter, setVoiceFilter] = useState('');
   const [memberStatuses, setMemberStatuses] = useState<MemberAttendance[]>([]);
-  const [globalNote, setGlobalNote] = useState('');
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
 
   const voiceOptions = [
     { value: '', label: 'All voices' },
@@ -47,46 +44,46 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
     { value: 'late', label: 'Late' },
   ];
 
-  const filteredMembers = members.filter(m => voiceFilter ? m.voice === voiceFilter : true);
-
   useEffect(() => {
     if (isOpen) {
-      const initial = filteredMembers.map(m => ({
-        memberId: m.id,
-        memberName: m.name,
-        voice: m.voice,
-        status: 'present' as const,
-        note: '',
-      }));
-      setMemberStatuses(initial);
+      loadMembers();
     }
   }, [isOpen, voiceFilter]);
 
-  const updateMemberStatus = (memberId: string, status: 'present' | 'absent' | 'excused' | 'late') => {
-    setMemberStatuses(prev =>
-      prev.map(m => m.memberId === memberId ? { ...m, status } : m)
-    );
+  const loadMembers = async () => {
+    try {
+      setIsLoadingMembers(true);
+      const params: Record<string, string> = { status: 'Active' };
+      if (voiceFilter) params.voice = voiceFilter;
+      const res = await membersApi.getAll(params);
+      const initial = (res.data || []).map((m: any) => ({
+        member_id: String(m.id),
+        member_name: m.name,
+        voice: m.voice,
+        status: 'present' as const,
+      }));
+      setMemberStatuses(initial);
+    } catch (err) {
+      console.error('Failed to load members');
+    } finally {
+      setIsLoadingMembers(false);
+    }
   };
 
-  const updateMemberNote = (memberId: string, note: string) => {
+  const updateMemberStatus = (member_id: string, status: 'present' | 'absent' | 'excused' | 'late') => {
     setMemberStatuses(prev =>
-      prev.map(m => m.memberId === memberId ? { ...m, note } : m)
+      prev.map(m => m.member_id === member_id ? { ...m, status } : m)
     );
   };
 
   const handleSubmit = () => {
     const records = memberStatuses.map(ms => ({
-      memberId: ms.memberId,
-      memberName: ms.memberName,
-      voice: ms.voice,
+      member_id: ms.member_id,
       date,
-      eventType,
+      event_type: eventType,
       status: ms.status,
-      markedBy: 'Current User',
-      note: ms.note || globalNote,
     }));
     onSave(records);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -104,28 +101,22 @@ export default function MarkAttendanceModal({ isOpen, onClose, onSave }: MarkAtt
             <Select label="Event Type" options={eventOptions} value={eventType} onChange={(e) => setEventType(e.target.value)} required />
             <Select label="Filter by Voice" options={voiceOptions} value={voiceFilter} onChange={(e) => setVoiceFilter(e.target.value)} />
           </div>
-          <Textarea label="Global Note (applies to all)" value={globalNote} onChange={(e) => setGlobalNote(e.target.value)} rows={2} />
           <div className={styles.membersSection}>
             <h3>Members</h3>
-            {memberStatuses.map(member => (
-              <div key={member.memberId} className={styles.memberRow}>
+            {isLoadingMembers && <p>Loading members...</p>}
+            {!isLoadingMembers && memberStatuses.map(member => (
+              <div key={member.member_id} className={styles.memberRow}>
                 <div className={styles.memberInfo}>
-                  <span className={styles.memberName}>{member.memberName}</span>
+                  <span className={styles.memberName}>{member.member_name}</span>
                   <span className={styles.memberVoice}>{member.voice}</span>
                 </div>
                 <div className={styles.statusSelect}>
                   <Select
                     options={statusOptions}
                     value={member.status}
-                    onChange={(e) => updateMemberStatus(member.memberId, e.target.value as any)}
+                    onChange={(e) => updateMemberStatus(member.member_id, e.target.value as any)}
                   />
                 </div>
-                <Input
-                  placeholder="Individual note"
-                  value={member.note}
-                  onChange={(e) => updateMemberNote(member.memberId, e.target.value)}
-                  className={styles.noteInput}
-                />
               </div>
             ))}
           </div>

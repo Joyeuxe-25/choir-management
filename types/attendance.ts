@@ -1,11 +1,12 @@
 export interface AttendanceRecord {
   id: string;
-  memberId: string;
-  memberName: string;
-  voice: string;
+  member_id: string;
+  member_name: string;
+  member_voice: string;
   date: string;
-  eventType: string;
+  event_type: string;
   status: 'present' | 'absent' | 'excused' | 'late';
-  markedBy: string;
-  note?: string;
+  marked_by_name?: string;
+  created_at?: string;
+  updated_at?: string;
 }

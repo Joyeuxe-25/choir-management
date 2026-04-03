@@ -14,6 +14,7 @@ const statusVariant = {
   present: 'success',
   absent: 'danger',
   excused: 'warning',
+  late: 'info',
 } as const;
 
 export default function AttendanceDetailModal({ isOpen, onClose, record }: AttendanceDetailModalProps) {
@@ -27,13 +28,12 @@ export default function AttendanceDetailModal({ isOpen, onClose, record }: Atten
           <button className={styles.closeButton} onClick={onClose}>×</button>
         </div>
         <div className={styles.content}>
-          <InfoRow label="Member" value={record.memberName} />
-          <InfoRow label="Voice" value={record.voice} />
+          <InfoRow label="Member" value={record.member_name} />
+          <InfoRow label="Voice" value={record.member_voice} />
           <InfoRow label="Date" value={record.date} />
-          <InfoRow label="Event Type" value={record.eventType} />
+          <InfoRow label="Event Type" value={record.event_type} />
           <InfoRow label="Status" value={<Badge variant={statusVariant[record.status]}>{record.status}</Badge>} />
-          <InfoRow label="Marked By" value={record.markedBy} />
-          <InfoRow label="Note" value={record.note || '—'} />
+          <InfoRow label="Marked By" value={record.marked_by_name || '—'} />
         </div>
         <div className={styles.footer}>
           <Button variant="outline" onClick={onClose}>Close</Button>

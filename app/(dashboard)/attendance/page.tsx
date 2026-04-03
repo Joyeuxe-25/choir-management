@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageHeader from '@/components/shared/PageHeader';
 import SearchBar from '@/components/shared/SearchBar';
 import FilterBar from '@/components/shared/FilterBar';
@@ -10,12 +10,14 @@ import AttendanceList from '@/components/attendance/AttendanceList';
 import MarkAttendanceModal from '@/components/attendance/MarkAttendanceModal';
 import EditAttendanceModal from '@/components/attendance/EditAttendanceModal';
 import AttendanceDetailModal from '@/components/attendance/AttendanceDetailModal';
-import { attendanceRecords as initialRecords } from '@/data/attendance';
+import { attendanceApi } from '@/lib/api';
 import { eventTypes } from '@/data/eventTypes';
 import { AttendanceRecord } from '@/types';
 
 export default function AttendancePage() {
-  const [records, setRecords] = useState<AttendanceRecord[]>(initialRecords);
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [voiceFilter, setVoiceFilter] = useState('');
   const [eventFilter, setEventFilter] = useState('');
@@ -24,6 +26,36 @@ export default function AttendancePage() {
   const [isMarkModalOpen, setIsMarkModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AttendanceRecord | undefined>(undefined);
   const [viewingRecord, setViewingRecord] = useState<AttendanceRecord | undefined>(undefined);
+
+  const loadRecords = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      const params: Record<string, string> = {};
+      if (voiceFilter) params.voice = voiceFilter;
+      if (eventFilter) params.event_type = eventFilter;
+      if (statusFilter) params.status = statusFilter;
+      if (dateFilter) params.date = dateFilter;
+      if (searchQuery) params.member = searchQuery;
+      const res = await attendanceApi.getAll(params);
+      setRecords(res.data || []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load attendance records');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRecords();
+  }, [voiceFilter, eventFilter, statusFilter, dateFilter]);
+
+  const filteredRecords = useMemo(() => {
+    if (!searchQuery) return records;
+    return records.filter(r =>
+      r.member_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [records, searchQuery]);
 
   const voiceOptions = [
     { value: '', label: 'All voices' },
@@ -46,27 +78,28 @@ export default function AttendancePage() {
     { value: 'late', label: 'Late' },
   ];
 
-  const filteredRecords = useMemo(() => {
-    return records.filter(record => {
-      const matchesSearch = record.memberName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesVoice = voiceFilter ? record.voice === voiceFilter : true;
-      const matchesEvent = eventFilter ? record.eventType === eventFilter : true;
-      const matchesStatus = statusFilter ? record.status === statusFilter : true;
-      const matchesDate = dateFilter ? record.date === dateFilter : true;
-      return matchesSearch && matchesVoice && matchesEvent && matchesStatus && matchesDate;
-    });
-  }, [records, searchQuery, voiceFilter, eventFilter, statusFilter, dateFilter]);
-
-  const handleMarkAttendance = (newRecords: Omit<AttendanceRecord, 'id'>[]) => {
-    const newIds = records.length + 1;
-    const recordsWithIds = newRecords.map((r, idx) => ({ ...r, id: String(newIds + idx) }));
-    setRecords([...records, ...recordsWithIds]);
-    setIsMarkModalOpen(false);
+  const handleMarkAttendance = async (newRecords: any[]) => {
+    try {
+      for (const record of newRecords) {
+        await attendanceApi.create(record);
+      }
+      setIsMarkModalOpen(false);
+      loadRecords();
+    } catch (err: any) {
+      alert(err.message || 'Failed to save attendance');
+    }
   };
 
-  const handleEditRecord = (updatedRecord: AttendanceRecord) => {
-    setRecords(records.map(r => r.id === updatedRecord.id ? updatedRecord : r));
-    setEditingRecord(undefined);
+  const handleEditRecord = async (updatedRecord: AttendanceRecord) => {
+    try {
+      await attendanceApi.update(String(updatedRecord.id), {
+        status: updatedRecord.status,
+      });
+      setEditingRecord(undefined);
+      loadRecords();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update attendance');
+    }
   };
 
   const handleViewRecord = (record: AttendanceRecord) => {
@@ -87,11 +120,15 @@ export default function AttendancePage() {
         <Select label="Status" options={statusOptions} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
         <Input label="Date" type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
       </FilterBar>
-      <AttendanceList
-        records={filteredRecords}
-        onEdit={setEditingRecord}
-        onView={handleViewRecord}
-      />
+      {isLoading && <p style={{ padding: '1rem' }}>Loading attendance records...</p>}
+      {error && <p style={{ padding: '1rem', color: 'red' }}>{error}</p>}
+      {!isLoading && !error && (
+        <AttendanceList
+          records={filteredRecords}
+          onEdit={setEditingRecord}
+          onView={handleViewRecord}
+        />
+      )}
       <MarkAttendanceModal
         isOpen={isMarkModalOpen}
         onClose={() => setIsMarkModalOpen(false)}
